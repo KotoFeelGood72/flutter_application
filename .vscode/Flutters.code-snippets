@@ -1,0 +1,31 @@
+"Без состояние": {
+	"prefix": "sles",
+	"body": [
+	"import 'package:flutter/material.dart';",
+	"",
+	"class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} extends StatelessWidget {",
+	"\t@override",
+	"\tWidget build(BuildContext context) {",
+	"\t\treturn $1;",
+	"\t}",
+	"}", 
+	]  
+},
+"С состоянием": {
+	"prefix": "sful",
+	"body": [
+	"import 'package:flutter/material.dart';",
+	"",
+	"class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/} extends StatefulWidget {",
+	"\t@override",
+	"\tState<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}> createState() => _${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}State();",
+	"}",
+	"",
+	"class _${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}State extends State<${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/}> {",
+	"\t@override",
+	"\tWidget build(BuildContext context) {",
+	"\t\treturn $2;",
+	"\t}",
+	"}",
+	]
+},
