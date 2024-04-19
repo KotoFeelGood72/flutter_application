@@ -14,9 +14,9 @@ class _AccessState extends State<Access> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(height: 13),
+        const SizedBox(height: 13),
         Container(
-          margin: EdgeInsets.only(bottom: 9),
+          margin: const EdgeInsets.only(bottom: 9),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -39,7 +39,7 @@ class _AccessState extends State<Access> {
           child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: <Widget>[
               Row(
                 children: <Widget>[
@@ -60,7 +60,7 @@ class _AccessState extends State<Access> {
                         ),
                         child: TextButton(
                           style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(
+                            padding: const EdgeInsets.only(
                                 left: 16, top: 25, bottom: 16, right: 29),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -70,7 +70,7 @@ class _AccessState extends State<Access> {
                           child: Column(
                             children: <Widget>[
                               Container(
-                                margin: EdgeInsets.only(bottom: 16),
+                                margin: const EdgeInsets.only(bottom: 16),
                                 child: const Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -162,7 +162,7 @@ class _AccessState extends State<Access> {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 children: <Widget>[
                   Expanded(
@@ -225,7 +225,7 @@ class _AccessState extends State<Access> {
                           ),
                         )),
                   ),
-                  SizedBox(width: 15),
+                  const SizedBox(width: 15),
                   Expanded(
                     flex: 1,
                     child: Container(

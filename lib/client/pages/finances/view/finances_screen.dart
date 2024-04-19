@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/client/components/balans.dart';
 import 'package:flutter_application/client/pages/finances/screens/history_screen.dart';
 import 'package:flutter_application/client/pages/finances/screens/receipts_screen.dart';
+import 'package:flutter_application/service/dio_config.dart';
 
 @RoutePage()
 class FinancesScreen extends StatefulWidget {
@@ -15,9 +16,11 @@ class FinancesScreen extends StatefulWidget {
 class _FinancesScreenState extends State<FinancesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  double balans = 0.0;
 
   @override
   void initState() {
+    _getUserInfo();
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
@@ -28,6 +31,18 @@ class _FinancesScreenState extends State<FinancesScreen>
     super.dispose();
   }
 
+  Future<void> _getUserInfo() async {
+    try {
+      final response = await DioSingleton().dio.get('client/profile');
+      setState(() {
+        balans = response.data['balance'] ?? 0.0;
+      });
+    } catch (e) {
+      print("Ошибка при получении информации : $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
@@ -35,7 +50,7 @@ class _FinancesScreenState extends State<FinancesScreen>
         child: Column(
           children: [
             Container(
-              color: Color(0xFF18232D),
+              color: const Color(0xFF18232D),
               child: Padding(
                 padding: const EdgeInsets.only(top: 40),
                 child: AppBar(
@@ -67,33 +82,28 @@ class _FinancesScreenState extends State<FinancesScreen>
             Container(
               color: const Color(0xFF18232D),
               child: Column(children: <Widget>[
-                Container(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 30, left: 15, right: 15),
-                    child: Row(
-                      children: [
-                        Text(
-                          'SMART 17',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 30, left: 15, right: 15),
+                  child: Row(
+                    children: [
+                      Text(
+                        'SMART 17',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  child: const Padding(
-                      padding: EdgeInsets.only(
-                          top: 17, left: 15, right: 15, bottom: 20),
-                      child: Balans(
-                        text: 'Utility bills and additional services',
-                        price: '3,696.13',
-                        showPayButton: false,
-                      )),
-                ),
+                Padding(
+                    padding: const EdgeInsets.only(
+                        top: 17, left: 15, right: 15, bottom: 20),
+                    child: Balans(
+                      text: 'Utility bills and additional services',
+                      price: balans,
+                      showPayButton: false,
+                    )),
               ]),
             ),
           ],
@@ -106,27 +116,28 @@ class _FinancesScreenState extends State<FinancesScreen>
             SizedBox(
               height: 46,
               child: Container(
-                margin: EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                     color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(7)),
                 child: Padding(
                   padding: const EdgeInsets.all(5),
                   child: TabBar(
+                    dividerColor: Colors.transparent,
                     controller: _tabController,
                     indicator: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(7),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0x1A000000), // Цвет тени в формате ARGB
-                          offset: Offset(1, 1), // Смещение тени
-                          blurRadius: 10.0, // Радиус размытия
+                          color: Color(0x1A000000),
+                          offset: Offset(1, 1),
+                          blurRadius: 10.0,
                         ),
                       ],
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
-                    unselectedLabelColor: Color(0xFF6C6770),
+                    unselectedLabelColor: const Color(0xFF6C6770),
                     labelColor: Colors.black,
                     tabs: const [
                       Tab(text: 'Receipts'),
@@ -141,7 +152,6 @@ class _FinancesScreenState extends State<FinancesScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: const [
-                  // Ваши компоненты для каждой вкладки
                   Center(child: ReceiptsScreen()),
                   Center(child: HistoryScreen()),
                 ],

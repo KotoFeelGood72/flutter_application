@@ -1,14 +1,17 @@
+import "package:auto_route/auto_route.dart";
 import "package:flutter/material.dart";
+import "package:flutter_application/router/router.dart";
 
 class Requests extends StatefulWidget {
-  const Requests({Key? key}) : super(key: key);
+  const Requests({Key? key, required this.activeRequest}) : super(key: key);
+
+  final int activeRequest;
 
   @override
   _RequestsState createState() => _RequestsState();
 }
 
 class _RequestsState extends State<Requests> {
-  int activeRequest = 0;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -16,27 +19,26 @@ class _RequestsState extends State<Requests> {
         TextButton.icon(
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(
-                Colors.white.withOpacity(0.07)), // Фон кнопки
+                Colors.white.withOpacity(0.07)),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15), // Радиус границы
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
-            padding: MaterialStateProperty.all<EdgeInsets>(
-                EdgeInsets.all(20)), // Внутренний отступ для всей кнопки
+            padding:
+                MaterialStateProperty.all<EdgeInsets>(const EdgeInsets.all(20)),
           ),
           icon: Padding(
               padding: const EdgeInsets.only(right: 3),
-              child:
-                  Image.asset('assets/img/file.png')), // Иконка перед текстом
+              child: Image.asset('assets/img/file.png')),
           label: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '$activeRequest active requests',
-                style: TextStyle(color: Colors.white),
-              )), // Текст на кнопке
+                '${widget.activeRequest} active requests',
+                style: const TextStyle(color: Colors.white),
+              )),
           onPressed: () {
-            // Действие при нажатии на кнопку
+            AutoRouter.of(context).push(const InquiresRoute());
           },
         )
       ],

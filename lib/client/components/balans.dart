@@ -1,12 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import "package:flutter/material.dart";
-
-import 'package:flutter/material.dart';
 import 'package:flutter_application/router/router.dart';
 
 class Balans extends StatefulWidget {
   final String text; // Текстовое поле для отображения
-  final String price; // Цена для отображения
+  final double price; // Цена для отображения
   final bool showPayButton; // Флаг для отображения кнопки Pay
 
   const Balans({

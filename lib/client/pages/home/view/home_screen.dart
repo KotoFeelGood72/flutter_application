@@ -1,4 +1,5 @@
-import 'package:auto_route/annotations.dart';
+import 'dart:ffi';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/client/components/access.dart';
@@ -6,9 +7,11 @@ import 'package:flutter_application/client/components/balans.dart';
 import 'package:flutter_application/client/components/news.dart';
 import 'package:flutter_application/client/components/offers.dart';
 import 'package:flutter_application/client/components/requests.dart';
+import 'package:flutter_application/client/modal/ModalOrder.dart';
+import 'package:flutter_application/client/modal/components/select_objects.dart';
 import 'package:flutter_application/client/ui/ModalBurger.dart';
-import 'package:flutter_application/client/ui/select.dart';
 import 'package:flutter_application/router/router.dart';
+import 'package:flutter_application/service/dio_config.dart';
 
 @RoutePage()
 class HomeScreen extends StatefulWidget {
@@ -20,23 +23,94 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  int ordersLength = 0;
+  double balans = 0.0;
+  Map<String?, dynamic> user = {};
+  Map<String?, dynamic> inqServiceLength = {};
 
-  void showMenuModal() {
+  @override
+  void initState() {
+    super.initState();
+    _getInqServiceItems();
+    _getUserInfo();
+    _getOrderList();
+  }
+
+  void showModal(String type) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return const ModalBurger();
+        double modalHeight = 0.0;
+        if (type == 'burger') {
+          modalHeight = MediaQuery.of(context).size.height * 0.55;
+        } else if (type == 'order') {
+          modalHeight = MediaQuery.of(context).size.height * 0.8;
+        }
+
+        return Container(
+          height: modalHeight,
+          child: _getModalContent(type),
+        );
       },
     );
   }
 
   void _onItemTapped(int index) {
-    if (index == 0) {
-      showMenuModal(); // Показываем модальное окно при нажатии на кнопку меню
-    } else {
+    switch (index) {
+      case 0:
+        showModal('burger');
+        break;
+      case 1:
+        showModal('order');
+        break;
+      case 2:
+        context.router.push(const ContactsRoute());
+        break;
+      default:
+        setState(() {
+          _selectedIndex = index;
+        });
+        break;
+    }
+  }
+
+  Future<void> _getInqServiceItems() async {
+    try {
+      final response = await DioSingleton().dio.get('client/get_orders');
       setState(() {
-        _selectedIndex = index;
+        inqServiceLength = response.data;
+        ordersLength = inqServiceLength['orders']?.length ?? 0;
       });
+    } catch (e) {
+      // print("Ошибка при получении информации о заказе: $e");
+    }
+  }
+
+  Future<void> _getUserInfo() async {
+    try {
+      final response = await DioSingleton().dio.get('client/profile');
+      setState(() {
+        user = response.data;
+        balans = response.data['balance'] ?? 0.0;
+      });
+    } catch (e) {}
+  }
+
+  Future<void> _getOrderList() async {
+    try {
+      final response = await DioSingleton().dio.get('client/get_order_list');
+    } catch (e) {}
+  }
+
+  Widget _getModalContent(String type) {
+    switch (type) {
+      case 'burger':
+        return const ModalBurger();
+      case 'order':
+        return ModalOrder(id: user['apartment_id']);
+      default:
+        return const SizedBox.shrink();
     }
   }
 
@@ -49,114 +123,132 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               color: const Color(0xFF18232D),
               child: Column(children: <Widget>[
-                Container(
-                    child: Padding(
+                Padding(
                   padding: const EdgeInsets.only(top: 71, left: 15, right: 15),
-                  child: Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Select(),
-                        Row(
-                          children: <Widget>[
-                            IconButton(
-                              icon: const Icon(
-                                Icons.notifications,
-                                color: Color.fromARGB(255, 255, 255, 255),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return const SelectObjects();
+                            },
+                          );
+                        },
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(right: 20),
+                              child: Text(
+                                'SMART 17',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
                               ),
-                              iconSize: 18,
-                              onPressed: () {
-                                // Код для другого действия
-                              },
                             ),
-                            IconButton(
-                              onPressed: () {
-                                AutoRouter.of(context).push(ProfileRoute());
-                              },
-                              icon: Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color:
-                                      const Color.fromARGB(20, 255, 255, 255),
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1,
-                                  ),
+                            Positioned(
+                              top: 12,
+                              right: 0,
+                              child: SizedBox(
+                                width: 10,
+                                height: 10,
+                                child: Image.asset(
+                                    'assets/img/chevron-down.png',
+                                    fit: BoxFit.contain),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications,
+                              color: Color.fromARGB(255, 255, 255, 255),
+                            ),
+                            iconSize: 18,
+                            onPressed: () {},
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              AutoRouter.of(context).push(const ProfileRoute());
+                            },
+                            icon: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color.fromARGB(20, 255, 255, 255),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1,
                                 ),
-                                child: Center(
-                                  child: Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Color.fromARGB(22, 255, 255, 255),
-                                    ),
-                                    child: Center(
-                                      child: Image.asset(
-                                        'assets/img/user.png',
-                                        width: 22,
-                                        height: 22,
-                                      ),
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color.fromARGB(22, 255, 255, 255),
+                                  ),
+                                  child: Center(
+                                    child: Image.asset(
+                                      'assets/img/user.png',
+                                      width: 22,
+                                      height: 22,
                                     ),
                                   ),
                                 ),
                               ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
                   ),
-                )),
-                Container(
-                  child: const Padding(
-                      padding: EdgeInsets.only(
-                          top: 29, left: 15, right: 15, bottom: 10),
-                      child: Balans(
-                        text: 'You have unpaid bills',
-                        price: '3,696.13',
-                        showPayButton: true,
-                      )),
                 ),
-                Container(
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-                    child: Requests(),
-                  ),
+                Padding(
+                    padding: const EdgeInsets.only(
+                        top: 29, left: 15, right: 15, bottom: 10),
+                    child: Balans(
+                      text: 'You have unpaid bills',
+                      price: balans,
+                      showPayButton: true,
+                    )),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 15, right: 15, bottom: 15),
+                  child: Requests(activeRequest: ordersLength),
                 ),
               ]),
             ),
-            Container(
-              child: const Padding(
-                padding: EdgeInsets.only(left: 15, right: 15),
-                child: Access(),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(left: 15, right: 15),
+              child: Access(),
             ),
-            Container(
-              child: const Padding(
-                padding: EdgeInsets.only(left: 15, right: 15),
-                child: News(),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(left: 15, right: 15),
+              child: News(),
             ),
-            Container(
-              child: const Padding(
-                padding: EdgeInsets.only(left: 15, right: 15),
-                child: Offers(),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(left: 15, right: 15),
+              child: Offers(),
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFF9F9F9),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        backgroundColor: const Color(0xFFF9F9F9),
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
             icon: Icon(Icons.menu),
             label: 'Menu',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(
               Icons.add_circle_outline,
               color: Color(0xFFF9F9F9),
@@ -164,24 +256,24 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Create a request',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.contact_phone),
+            icon: Image.asset('assets/img/support.png'),
             label: 'Contact',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFF6873D1),
+        selectedItemColor: const Color(0xFF6873D1),
         onTap: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _onItemTapped(1), // Активация второй вкладки
+        onPressed: () => _onItemTapped(1),
         tooltip: 'Create a request',
-        backgroundColor: Color(0xFF6873D1),
+        backgroundColor: const Color(0xFF6873D1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
         child: const Icon(
           Icons.add,
           color: Colors.white,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30), // Установите желаемый радиус
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

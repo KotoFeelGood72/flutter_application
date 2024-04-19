@@ -1,5 +1,53 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/router/router.dart';
+import 'package:flutter_application/service/dio_config.dart';
+
+final _router = AppRouter();
+Future<void> _signOut() async {
+  try {
+    await FirebaseAuth.instance.signOut();
+    _router.push(const AuthRoute());
+  } catch (e) {
+    print("Ошибка при выходе: $e");
+  }
+}
+
+Future<void> _uploadImg() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType
+        .image, // Убедитесь, что пользователь может выбирать только изображения
+  );
+
+  if (result != null) {
+    File imageFile = File(result.files.single.path!);
+
+    // Создание FormData
+    FormData formData = FormData.fromMap({
+      "photo":
+          await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
+    });
+
+    // Вывод информации о formData в консоль для проверки
+    print(formData.fields); // Показывает поля формы
+    print(formData.files); // Показывает файлы, прикрепленные к форме
+
+    try {
+      final response =
+          await DioSingleton().dio.post('add_photo', data: formData);
+    } catch (e) {
+      print("Ошибка при загрузке изображения: $e");
+    }
+  } else {
+    // Пользователь отменил выбор файла
+    print("Выбор файла отменен");
+  }
+}
 
 @RoutePage()
 class ProfileScreen extends StatefulWidget {
@@ -10,6 +58,39 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  Map<String?, dynamic> userProfile = {};
+  String? userImg;
+
+  @override
+  void initState() {
+    super.initState();
+    // _getUserInfo();
+    _getUserInfo();
+  }
+
+  // Future<void> _getUserInfo() async {
+  //   try {
+  //     final response = await DioSingleton().dio.get('get_profile_uk');
+  //     setState(() {
+  //       userProfile = response.data;
+  //     });
+  //   } catch (e) {
+  //     print("Ошибка при получении информации о профиле: $e");
+  //   }
+  // }
+
+  Future<void> _getUserInfo() async {
+    try {
+      final response = await DioSingleton().dio.get('client/profile');
+      setState(() {
+        userProfile = response.data;
+      });
+      print('Image: ${userProfile}');
+    } catch (e) {
+      print("Ошибка при получении информации о профиле: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,16 +106,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: const Text('Profile',
                       style: TextStyle(color: Colors.white)),
                   elevation: 0,
-                  // backgroundColor: const Color(0xFF18232D),
-                  backgroundColor: Color(0xFF18232D),
+                  backgroundColor: const Color(0xFF18232D),
                   centerTitle: true,
                   leading: Container(
-                    margin: EdgeInsets.all(13),
+                    margin: const EdgeInsets.all(13),
                     decoration: BoxDecoration(
-                      color: Colors.white
-                          .withOpacity(0.2), // Прозрачный белый фон контейнера
-                      borderRadius:
-                          BorderRadius.circular(100), // Закругление углов
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(100),
                     ),
                     child: IconButton(
                       icon: Image.asset(
@@ -53,37 +131,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: double.infinity,
               child: Column(children: <Widget>[
                 Container(
-                  width: 103, // Размер внешнего контейнера
+                  width: 103,
                   height: 103,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                        103 / 2), // Радиус скругления для круглой обводки
-                    color: Colors.transparent, // Прозрачный фон, если требуется
+                    borderRadius: BorderRadius.circular(103 / 2),
+                    color: Colors.transparent,
                     border: Border.all(
-                      color: Colors.white, // Цвет обводки
-                      width: 1, // Толщина обводки
+                      color: Colors.white,
+                      width: 1,
                     ),
                   ),
                   child: Center(
-                    // Центрирование внутреннего контейнера
                     child: Container(
                       width: 90,
                       height: 90,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                            100), // Радиус скругления внутреннего контейнера
+                        borderRadius: BorderRadius.circular(100),
                         color: Color.fromRGBO(255, 255, 255, 0.2),
                       ),
-                      child: Image.asset(
-                          'assets/img/profile-big.png'), // Ваше изображение
+                      child: Image.asset('assets/img/profile-big.png'),
                     ),
                   ),
                 ),
                 Container(
                   margin: const EdgeInsets.only(bottom: 16, top: 20),
-                  child: const Text(
-                    'First name Last name',
-                    style: TextStyle(
+                  child: Text(
+                    '${userProfile['firstname']} ${userProfile['lastname']}',
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -94,19 +168,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextButton.styleFrom(
                     backgroundColor: const Color.fromRGBO(255, 255, 255, 0.32),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          15), // Установите нужное значение радиуса здесь
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: _uploadImg,
                   child: const Padding(
                     padding:
                         EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
                     child: Text(
                       'Add photo',
                       style: TextStyle(
-                        color:
-                            Colors.white, // Пример использования цвета текста
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -133,19 +205,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               ListInfoItem(
-                  title: 'First name Last name',
+                  title:
+                      '${userProfile['firstname']} ${userProfile['lastname']}',
                   icon: 'assets/img/mini-user.png'),
               ListInfoItem(
-                  title: '8(999)-999-99-99', icon: 'assets/img/mini-phone.png'),
+                  title: '${userProfile['phone_number']}',
+                  icon: 'assets/img/mini-phone.png'),
               ListInfoItem(
-                  title: 'mail004@gmail.com', icon: 'assets/img/mini-mail.png'),
-              // ],
-              // ListView(
-              //   shrinkWrap: true,
-              //   physics: NeverScrollableScrollPhysics(),
-              //   children: const [
-              // ),
-              SizedBox(height: 37),
+                  title: '${userProfile['email']}',
+                  icon: 'assets/img/mini-mail.png'),
+              const SizedBox(height: 37),
               Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(bottom: 13),
@@ -155,17 +224,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.w600, color: Color(0xFF73797C)),
                 ),
               ),
-              // ListView(
-              //   physics: NeverScrollableScrollPhysics(),
-              //   shrinkWrap: true,
-              //   children: const [
-              ListInfoItem(
+              const ListInfoItem(
                   title: 'Login settings', icon: 'assets/img/mini-login.png'),
-              ListInfoItem(
+              const ListInfoItem(
                   title: 'Notifications', icon: 'assets/img/mini-notice.png'),
-              ListInfoItem(
+              const ListInfoItem(
                   title: 'About the application',
                   icon: 'assets/img/mini-about.png'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _signOut,
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color(0xFF878E92)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(14.0),
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
           // ],
@@ -185,14 +272,15 @@ class ListInfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 13),
+      margin: const EdgeInsets.only(bottom: 13),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10), color: Color(0xFFF5F5F5)),
+          borderRadius: BorderRadius.circular(10),
+          color: const Color(0xFFF5F5F5)),
       child: ListTile(
         leading: Image.asset(icon),
         title: Text(
           title,
-          style: TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14),
         ),
       ),
     );
