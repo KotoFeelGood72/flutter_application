@@ -20,26 +20,22 @@ Future<void> _signOut() async {
 
 Future<void> _uploadImg() async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType
-        .image, // Убедитесь, что пользователь может выбирать только изображения
+    type: FileType.image,
   );
 
   if (result != null) {
     File imageFile = File(result.files.single.path!);
 
-    // Создание FormData
     FormData formData = FormData.fromMap({
       "photo":
           await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
     });
-
-    // Вывод информации о formData в консоль для проверки
-    print(formData.fields); // Показывает поля формы
-    print(formData.files); // Показывает файлы, прикрепленные к форме
+    print(formData.fields);
+    print(formData.files);
 
     try {
       final response =
-          await DioSingleton().dio.post('add_photo', data: formData);
+          await DioSingleton().dio.post('client/add_photo', data: formData);
     } catch (e) {
       print("Ошибка при загрузке изображения: $e");
     }
@@ -64,20 +60,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // _getUserInfo();
     _getUserInfo();
   }
-
-  // Future<void> _getUserInfo() async {
-  //   try {
-  //     final response = await DioSingleton().dio.get('get_profile_uk');
-  //     setState(() {
-  //       userProfile = response.data;
-  //     });
-  //   } catch (e) {
-  //     print("Ошибка при получении информации о профиле: $e");
-  //   }
-  // }
 
   Future<void> _getUserInfo() async {
     try {

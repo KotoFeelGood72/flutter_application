@@ -6,6 +6,7 @@ import 'package:flutter_application/client/pages/contacts/contacts.dart';
 import 'package:flutter_application/client/pages/home/home.dart';
 import 'package:flutter_application/client/pages/finances/finances.dart';
 import 'package:flutter_application/client/pages/inquires/inquires.dart';
+import 'package:flutter_application/client/pages/notification/client_note.dart';
 import 'package:flutter_application/client/pages/profile/profile.dart';
 import 'package:flutter_application/company/pages/appartaments/company_appartaments.dart';
 import 'package:flutter_application/company/pages/home/screens/company_main_screen.dart';
@@ -33,6 +34,10 @@ class AppRouter extends _$AppRouter {
         AutoRoute(
             page: InquiresRoute.page,
             path: '/clients/inquires',
+            guards: [AuthGuard()]),
+        AutoRoute(
+            page: ClientNoteRoute.page,
+            path: '/clients/notifications',
             guards: [AuthGuard()]),
         AutoRoute(
           page: AuthRoute.page,

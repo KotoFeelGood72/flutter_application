@@ -21,6 +21,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const AuthScreen(),
       );
     },
+    ClientNoteRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const ClientNoteScreen(),
+      );
+    },
     CompanyAppartamentsRoute.name: (routeData) {
       final pathParams = routeData.inheritedPathParams;
       final args = routeData.argsAs<CompanyAppartamentsRouteArgs>(
@@ -135,6 +141,20 @@ class AuthRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'AuthRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [ClientNoteScreen]
+class ClientNoteRoute extends PageRouteInfo<void> {
+  const ClientNoteRoute({List<PageRouteInfo>? children})
+      : super(
+          ClientNoteRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ClientNoteRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

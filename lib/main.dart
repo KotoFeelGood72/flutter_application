@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application/client/bloc/client_bloc.dart';
+import 'package:flutter_application/company/bloc/company_bloc.dart';
+import 'package:flutter_application/employee/bloc/employee_bloc.dart';
 import 'package:flutter_application/router/router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -88,7 +92,16 @@ class _MyAppState extends State<MyApp> {
       routerDelegate: AutoRouterDelegate(_appRouter,
           navigatorObservers: () => [AutoRouteObserver()]),
       routeInformationParser: _appRouter.defaultRouteParser(),
-      builder: (context, router) => router ?? const CircularProgressIndicator(),
+      builder: (context, router) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ClientBloc>(create: (context) => ClientBloc()),
+            BlocProvider<CompanyBloc>(create: (context) => CompanyBloc()),
+            BlocProvider<EmployeeBloc>(create: (context) => EmployeeBloc()),
+          ],
+          child: router ?? const CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/service/dio_config.dart';
 
 class News extends StatefulWidget {
   const News({super.key});
@@ -8,26 +9,53 @@ class News extends StatefulWidget {
 }
 
 class NewsItem {
-  final String text;
-  final String date;
-  final String navigatorLink;
+  final String? id;
+  final String? date;
+  final String? created_at;
+  final String? description;
+  final String? name;
 
-  NewsItem(
-      {required this.text, required this.date, required this.navigatorLink});
+  NewsItem({
+    this.id,
+    this.date,
+    this.created_at,
+    this.description,
+    this.name,
+  });
+
+  factory NewsItem.fromJson(Map<String, dynamic> json) {
+    return NewsItem(
+      id: json['id']?.toString(),
+      date: json['date']?.toString(),
+      created_at: json['created_at']?.toString(),
+      description: json['description'],
+      name: json['name'],
+    );
+  }
 }
 
 class _NewsState extends State<News> {
-  final List<NewsItem> newsList = [
-    NewsItem(
-        text: "Updating pedestrian paths",
-        date: "July 21, 2023",
-        navigatorLink: "/news1"),
-    NewsItem(
-        text: "Comfort service report for the 2nd quarter of 2023",
-        date: "July 21, 2023",
-        navigatorLink: "/news2"),
-    // Добавьте здесь больше новостей
-  ];
+  List<NewsItem> newsList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getHomeNews();
+  }
+
+  Future<void> _getHomeNews() async {
+    try {
+      final response = await DioSingleton().dio.get('client/news');
+      final data = List<Map<String, dynamic>>.from(response.data);
+      setState(() {
+        newsList = data.map((item) => NewsItem.fromJson(item)).toList();
+      });
+      // print("Получение новостей: $newsList");
+    } catch (e) {
+      print("Ошибка при получении новостей: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,41 +86,33 @@ class _NewsState extends State<News> {
                     ))
               ],
             ),
-            // SizedBox(height: 9),
             SizedBox(
               height: 145,
-              // Оберните ListView.builder в Expanded
               child: ListView.builder(
                 padding: EdgeInsets.zero,
-                scrollDirection: Axis.horizontal, // Горизонтальная прокрутка
+                scrollDirection: Axis.horizontal,
                 itemCount: newsList.length,
                 itemBuilder: (context, index) {
-                  // Получение новости из списка
                   NewsItem newsItem = newsList[index];
-
-                  // Создание виджета для каждой новости
                   return Padding(
                     padding: const EdgeInsets.only(top: 10, bottom: 10),
                     child: Container(
                       margin: EdgeInsets.only(right: 20),
                       decoration: BoxDecoration(
-                        color: Colors.white, // background: #FFF;
-                        borderRadius:
-                            BorderRadius.circular(15), // border-radius: 15px;
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
                         boxShadow: const [
                           BoxShadow(
-                            color:
-                                Color.fromRGBO(200, 199, 199, 0.5), // Цвет тени
-                            blurRadius: 10, // Размытие тени
-                            offset: Offset(1, 1), // Смещение тени по X и Y
+                            color: Color.fromRGBO(200, 199, 199, 0.5),
+                            blurRadius: 10,
+                            offset: Offset(1, 1),
                           ),
                         ],
                       ),
-                      width: 239, // Явно укажите ширину для каждого элемента
+                      width: 239,
                       child: InkWell(
                         onTap: () {
-                          // Действие при нажатии на новость, например, навигация
-                          Navigator.pushNamed(context, newsItem.navigatorLink);
+                          Navigator.pushNamed(context, newsItem.id.toString());
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(
@@ -102,19 +122,18 @@ class _NewsState extends State<News> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                newsItem.text,
+                                newsItem.name.toString(),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.w700),
                               ),
-                              const SizedBox(
-                                  height:
-                                      40), // Вставленный SizedBox для пространства
+                              const SizedBox(height: 40),
                               Text(
-                                newsItem.date,
+                                newsItem.created_at.toString(),
                                 style: TextStyle(
                                     color: Color(0xBC9FA0A2), fontSize: 12),
                               ),
-                              // Другие виджеты, если нужны
                             ],
                           ),
                         ),

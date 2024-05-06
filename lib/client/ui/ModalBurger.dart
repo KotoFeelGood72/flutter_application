@@ -17,17 +17,22 @@ class _ModalBurgerState extends State<ModalBurger> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Container(
-        child: Column(
+        child: ListView(
+          shrinkWrap: true,
           children: [
-            Container(
-              margin: const EdgeInsets.only(top: 7),
-              width: 37,
-              height: 5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: const Color(0xFFE2E2E2),
+            Center(
+              child: SizedBox(
+                width: 37,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 7),
+                  height: 5,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: const Color(0xFFE2E2E2),
+                  ),
+                ),
               ),
             ),
             Container(

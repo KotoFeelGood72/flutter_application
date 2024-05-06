@@ -233,7 +233,7 @@ class _CompanyHomeMainScreenState extends State<CompanyHomeMainScreen> {
             ),
             const Padding(
               padding: EdgeInsets.only(left: 20),
-              child: News(),
+              child: Text('News()'),
             ),
             Padding(
               padding: EdgeInsets.only(left: 10, right: 10),

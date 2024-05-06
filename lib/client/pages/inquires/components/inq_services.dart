@@ -1,8 +1,41 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/client/modal/ModalOrder.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class Order {
+  final int id;
+  final String name;
+  final String createdAt;
+  final String status;
+  final String selectedServices;
+  final List<Map<String, dynamic>> additionalServices;
+
+  Order({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.status,
+    required this.selectedServices,
+    required this.additionalServices,
+  });
+
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      id: json['order_id'] as int,
+      name: json['name'] as String,
+      createdAt: json['created_at'] as String,
+      status: json['status'] as String,
+      selectedServices: json['selected_services'] as String,
+      additionalServices: (json['additional_services'] as List<dynamic>)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList(),
+    );
+  }
+}
 
 class InqServices extends StatefulWidget {
   final int id;
@@ -38,38 +71,39 @@ class _InqServicesState extends State<InqServices> {
 
   @override
   Widget build(BuildContext context) {
-    var orders = inqServiceItems['orders'] as List<dynamic>? ?? [];
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: ListView.builder(
-          itemCount: orders.length,
-          itemBuilder: (BuildContext context, int index) {
-            var order = orders[index];
-            bool isLastItem = index == orders.length - 1;
-            return Container(
-              decoration: BoxDecoration(
-                border: isLastItem
-                    ? null
-                    : Border(
-                        bottom:
-                            BorderSide(color: Colors.grey[300]!, width: 1.0)),
-              ),
-              margin: const EdgeInsets.only(bottom: 20),
-              child: InqServiceItem(
-                title: order['name'],
-                date: order['created_at'],
-                status: order['status'],
-                id: order['order_id'].toString() ?? '',
-                selected_services: order['selected_services'] ?? '',
-                additionalServices:
-                    (order['additional_services'] as List<dynamic>? ?? [])
-                        .map((item) => Map<String, dynamic>.from(item))
-                        .toList(),
-              ),
+      body: BlocBuilder<ClientBloc, ClientState>(
+        builder: (context, state) {
+          if (state is ClientDataLoaded) {
+            return ListView.builder(
+              itemCount: state.orders.length,
+              itemBuilder: (BuildContext context, int index) {
+                Order order = state.orders[index];
+                bool isLastItem = index == state.orders.length - 1;
+                return Container(
+                  decoration: BoxDecoration(
+                    border: isLastItem
+                        ? null
+                        : Border(
+                            bottom: BorderSide(
+                                color: Colors.grey[300]!, width: 1.0)),
+                  ),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: InqServiceItem(
+                    title: order.name,
+                    date: order.createdAt,
+                    status: order.status,
+                    id: order.id.toString(),
+                    selected_services: order.selectedServices,
+                    additionalServices: order.additionalServices,
+                  ),
+                );
+              },
             );
-          },
-        ),
+          } else {
+            return Center(child: Text('No data available'));
+          }
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: TextButton(
@@ -78,7 +112,9 @@ class _InqServicesState extends State<InqServices> {
             context: context,
             isScrollControlled: true,
             builder: (BuildContext context) {
-              return ModalOrder(id: widget.id);
+              return ModalOrder(
+                id: widget.id,
+              );
             },
           );
         },

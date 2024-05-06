@@ -11,7 +11,7 @@ class DioSingleton {
 
   DioSingleton._internal() {
     _dio = Dio();
-    _dio.options.baseUrl = 'http://93.183.94.12:8000/api/v1/';
+    _dio.options.baseUrl = 'http://217.25.95.113:8000/api/v1/';
     _dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',

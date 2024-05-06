@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/client/modal/components/select_objects.dart';
 import 'package:flutter_application/client/modal/components/serviceItem.dart';
-import 'package:flutter_application/client/modal/components/service_content_builder.dart';
+// import 'package:flutter_application/client/modal/components/service_content_builder.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/company/modal/ModalInfo/payment/info_paid_modal.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SelectedService {
   final int id;
@@ -24,7 +26,10 @@ class SelectedService {
 
 class ModalOrder extends StatefulWidget {
   final int id;
-  const ModalOrder({Key? key, required this.id}) : super(key: key);
+  const ModalOrder({
+    Key? key,
+    required this.id,
+  }) : super(key: key);
 
   @override
   State<ModalOrder> createState() => _ModalOrderState();
@@ -46,27 +51,6 @@ class _ModalOrderState extends State<ModalOrder> {
     'Trash removal': const Color(0xFFB7BE61),
     'Other': const Color(0xFF7961BE),
   };
-  // final List<String> services = [
-  //   'Cleaning',
-  //   'Gardener',
-  //   'Pool',
-  //   'Trash removal',
-  //   'Other'
-  // ];
-
-  // List<ServiceItem> servicesList = [
-  //   const ServiceItem(serviceName: 'Window cleaning', price: 5),
-  //   const ServiceItem(
-  //     serviceName: 'Ironing',
-  //     price: 2,
-  //     isCountable: true,
-  //   ),
-  //   const ServiceItem(serviceName: 'Maintenance cleaning', price: 5),
-  //   const ServiceItem(
-  //     serviceName: 'Garage cleaning',
-  //     price: 5,
-  //   ),
-  // ];
 
   String? _selectedService = 'Cleaning';
   DateTime selectedDate = DateTime.now();
@@ -88,8 +72,6 @@ class _ModalOrderState extends State<ModalOrder> {
   Future<void> submitOrder() async {
     final String completionDate = "${selectedDate.toLocal()}".split(' ')[0];
     final String completionTime = selectedTime.format(context);
-
-    // Собираем данные для additional_services
     List<Map<String, dynamic>> additionalServicesData =
         selectedServices.map((service) {
       return {
@@ -112,13 +94,12 @@ class _ModalOrderState extends State<ModalOrder> {
         };
       }).toList(),
     };
-
+    final _clientsBloc = BlocProvider.of<ClientBloc>(context);
     try {
       final response =
           await DioSingleton().dio.post('client/create_order', data: orderData);
-      print('Response: ${response}');
-
-      Navigator.pop(context);
+      _clientsBloc.add(ClientInfoLoad());
+      Navigator.pop(context, true);
 
       showModalBottomSheet(
         context: context,
@@ -126,7 +107,7 @@ class _ModalOrderState extends State<ModalOrder> {
           return Container(
             height: 100,
             color: Colors.green,
-            child: Center(
+            child: const Center(
               child: Text(
                 'Your order has been successfully created',
                 style: TextStyle(
@@ -138,8 +119,6 @@ class _ModalOrderState extends State<ModalOrder> {
           );
         },
       );
-
-      // Обработка успешной отправки
     } catch (e) {
       print('Error submitting order: $e');
     }
@@ -179,12 +158,11 @@ class _ModalOrderState extends State<ModalOrder> {
     }
   }
 
-  List<PlatformFile> _selectedFiles =
-      []; // переменная для хранения выбранных файлов
+  List<PlatformFile> _selectedFiles = [];
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: true, // позволяет выбирать несколько файлов
+      allowMultiple: true,
     );
 
     if (result != null) {
@@ -226,52 +204,49 @@ class _ModalOrderState extends State<ModalOrder> {
           servicesAll['additional_services'][_selectedService] ?? [];
     }
     return Container(
+      color: Colors.white,
       padding: const EdgeInsets.all(17.0),
       child: ListView(
         shrinkWrap: true,
         children: [
+          SizedBox(height: 10),
           ModalHeader(title: 'Service'),
-          Container(
-            margin: const EdgeInsets.only(bottom: 25),
-            child: SizedBox(
-              height: 66,
-              child: TextButton(
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xFFF5F5F5)),
-                  padding: MaterialStateProperty.all(
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 21)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                onPressed: () {},
+          SizedBox(
+            height: 20,
+          ),
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return SelectObjects();
+                },
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 1),
+              margin: const EdgeInsets.only(bottom: 25),
+              child: SizedBox(
+                height: 66,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        child: const Text(
-                          'Smart, 17 12-2 floor 23',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const SelectObjects();
-                            },
-                          );
-                        },
+                      child: const Text(
+                        'Smart, 17 12-2 floor 23',
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.w500),
                       ),
                     ),
                     Transform.rotate(
                       angle: math.pi / 2 * 3,
                       child: const Icon(
                         Icons.chevron_left,
-                        color: Colors.black,
+                        color: Color(0xFF878E92),
                       ),
                     ),
                   ],
@@ -296,7 +271,10 @@ class _ModalOrderState extends State<ModalOrder> {
                     decoration: InputDecoration(
                       fillColor: const Color(0xFFF5F5F5),
                       filled: true,
-                      suffixIcon: const Icon(Icons.calendar_today),
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Color(0xFF878E92),
+                      ),
                       border: OutlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(10)),
@@ -313,7 +291,10 @@ class _ModalOrderState extends State<ModalOrder> {
                     decoration: InputDecoration(
                       fillColor: const Color(0xFFF5F5F5),
                       filled: true,
-                      suffixIcon: const Icon(Icons.access_time),
+                      suffixIcon: const Icon(
+                        Icons.access_time,
+                        color: Color(0xFF878E92),
+                      ),
                       border: OutlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(10)),
@@ -391,7 +372,7 @@ class _ModalOrderState extends State<ModalOrder> {
           ),
           Container(
             alignment: Alignment.centerLeft,
-            margin: const EdgeInsets.only(bottom: 42),
+            margin: const EdgeInsets.only(bottom: 10),
             child: TextButton.icon(
               icon: Transform.rotate(
                 angle: math.pi / 5,

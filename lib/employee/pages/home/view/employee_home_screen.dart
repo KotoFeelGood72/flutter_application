@@ -190,7 +190,7 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
             ),
             const Padding(
               padding: EdgeInsets.only(left: 20),
-              child: News(),
+              child: Text('News()'),
             ),
           ],
         ),
