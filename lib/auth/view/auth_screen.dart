@@ -56,12 +56,12 @@ class _AuthScreenState extends State<AuthScreen>
               tabs: const [
                 Tab(
                     child: Text(
-                  'Sign Up',
+                  'Sign In',
                   style: TextStyle(color: Colors.white),
                 )),
                 Tab(
                     child: Text(
-                  'Sign In',
+                  'Sign Up',
                   style: TextStyle(color: Colors.white),
                 )),
               ],

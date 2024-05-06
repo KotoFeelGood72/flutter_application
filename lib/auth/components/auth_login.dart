@@ -189,7 +189,7 @@ class _LoginTabState extends State<LoginTab> {
                           style: const TextStyle(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
-                          primary: const Color(0xFF6873D1),
+                          // primary: const Color(0xFF6873D1),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 20),
                         )),
