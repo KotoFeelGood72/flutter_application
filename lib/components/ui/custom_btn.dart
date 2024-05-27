@@ -4,24 +4,29 @@ class CustomBtn extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;
   final Color color;
+  final double height;
+  final double borderRadius;
 
   const CustomBtn({
     super.key,
     required this.title,
     required this.onPressed,
     this.color = const Color(0xFF6873D1),
+    this.height = 60.0,
+    this.borderRadius = 15.0,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(borderRadius),
         color: color,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+      // ignore: avoid_unnecessary_containers
+      child: Container(
         child: TextButton(
           onPressed: onPressed,
           child: Text(

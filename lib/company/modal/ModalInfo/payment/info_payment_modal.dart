@@ -11,7 +11,6 @@ class InfoPaymentModal extends StatefulWidget {
   State<InfoPaymentModal> createState() => _InfoPaymentModalState();
 }
 
-// Вот здесь правильное использование `with SingleTickerProviderStateMixin`
 class _InfoPaymentModalState extends State<InfoPaymentModal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -31,11 +30,11 @@ class _InfoPaymentModalState extends State<InfoPaymentModal>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 25, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 15),
       color: Colors.white,
       child: ListView(shrinkWrap: true, children: [
-        ModalHeader(title: 'Payment history'),
-        SizedBox(height: 20),
+        const ModalHeader(title: 'Payment history'),
+        const SizedBox(height: 20),
         SizedBox(
           height: 46,
           child: Container(
@@ -71,13 +70,13 @@ class _InfoPaymentModalState extends State<InfoPaymentModal>
             ),
           ),
         ),
-        Container(
+        SizedBox(
           height: 500,
           child: TabBarView(
             controller: _tabController,
             children: [
-              Center(child: PaidPaymentScreen(id: widget.id)),
-              Center(child: UnpaidPaymentScreen(id: widget.id)),
+              PaidPaymentScreen(id: widget.id),
+              UnpaidPaymentScreen(id: widget.id),
             ],
           ),
         ),

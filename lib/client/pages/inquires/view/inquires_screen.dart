@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/client/pages/inquires/components/app_services.dart';
 import 'package:flutter_application/client/pages/inquires/components/com_services.dart';
 import 'package:flutter_application/client/pages/inquires/components/inq_services.dart';
@@ -37,18 +38,16 @@ class _InquiresScreenState extends State<InquiresScreen>
       setState(() {
         inq = response.data;
       });
-      print('$inq Главная');
     } catch (e) {}
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           centerTitle: true,
-          title: Container(
-            child: const Text(
-              'Inquires',
-            ),
+          title: const Text(
+            'Inquires',
           )),
       body: Padding(
         padding: const EdgeInsets.only(left: 18, right: 18, top: 30),
@@ -71,9 +70,9 @@ class _InquiresScreenState extends State<InquiresScreen>
                       borderRadius: BorderRadius.circular(7),
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0x1A000000), // Цвет тени в формате ARGB
-                          offset: Offset(1, 1), // Смещение тени
-                          blurRadius: 10.0, // Радиус размытия
+                          color: Color(0x1A000000),
+                          offset: Offset(1, 1),
+                          blurRadius: 10.0,
                         ),
                       ],
                     ),
@@ -94,9 +93,9 @@ class _InquiresScreenState extends State<InquiresScreen>
               child: Padding(
                 padding: const EdgeInsets.only(top: 30),
                 child: TabBarView(controller: _tabController, children: [
-                  InqServices(id: inq['apartment_id'] ?? 0),
-                  ComServices(),
-                  AppServices(),
+                  InqServices(),
+                  const ComServices(),
+                  const AppServices(),
                 ]),
               ),
             ),

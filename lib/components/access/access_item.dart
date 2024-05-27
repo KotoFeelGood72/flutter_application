@@ -1,4 +1,4 @@
-import "package:auto_route/auto_route.dart";
+// import "package:auto_route/auto_route.dart";
 import "package:flutter/material.dart";
 
 class AccessItem {
@@ -74,12 +74,12 @@ class AccessItemWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
+                SizedBox(
                   width: 40,
                   height: 40,
                   child: Image.asset(item.imageAssets[0], fit: BoxFit.cover),
                 ),
-                Container(
+                SizedBox(
                   width: 50,
                   height: 50,
                   child: Image.asset(item.imageAssets[1], fit: BoxFit.cover),

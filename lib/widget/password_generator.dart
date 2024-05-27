@@ -8,6 +8,7 @@ class PasswordGenerator extends StatefulWidget {
   const PasswordGenerator({super.key, required this.onPasswordGenerated});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PasswordGeneratorState createState() => _PasswordGeneratorState();
 }
 

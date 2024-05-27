@@ -15,6 +15,26 @@ abstract class _$AppRouter extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    AdminChatRoute.name: (routeData) {
+      final args = routeData.argsAs<AdminChatRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: AdminChatScreen(
+          key: args.key,
+          id: args.id,
+        ),
+      );
+    },
+    ArticlesRoute.name: (routeData) {
+      final args = routeData.argsAs<ArticlesRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ArticlesScreen(
+          key: args.key,
+          type: args.type,
+        ),
+      );
+    },
     AuthRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -58,6 +78,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const ContactsScreen(),
       );
     },
+    DevelopmentRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const DevelopmentScreen(),
+      );
+    },
     EmployProfileRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -98,6 +124,29 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const InquiresScreen(),
       );
     },
+    MettersRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const MettersScreen(),
+      );
+    },
+    NewsRoute.name: (routeData) {
+      final args = routeData.argsAs<NewsRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: NewsScreen(
+          key: args.key,
+          id: args.id,
+          type: args.type,
+        ),
+      );
+    },
+    NotificationsRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const NotificationsScreen(),
+      );
+    },
     ObjectSingleRoute.name: (routeData) {
       final pathParams = routeData.inheritedPathParams;
       final args = routeData.argsAs<ObjectSingleRouteArgs>(
@@ -128,7 +177,100 @@ abstract class _$AppRouter extends RootStackRouter {
         ),
       );
     },
+    TenantProfileRoute.name: (routeData) {
+      final args = routeData.argsAs<TenantProfileRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: TenantProfileScreen(
+          key: args.key,
+          id: args.id,
+          apartmentsId: args.apartmentsId,
+        ),
+      );
+    },
+    UsersChatRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const UsersChatScreen(),
+      );
+    },
   };
+}
+
+/// generated route for
+/// [AdminChatScreen]
+class AdminChatRoute extends PageRouteInfo<AdminChatRouteArgs> {
+  AdminChatRoute({
+    Key? key,
+    required String id,
+    List<PageRouteInfo>? children,
+  }) : super(
+          AdminChatRoute.name,
+          args: AdminChatRouteArgs(
+            key: key,
+            id: id,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'AdminChatRoute';
+
+  static const PageInfo<AdminChatRouteArgs> page =
+      PageInfo<AdminChatRouteArgs>(name);
+}
+
+class AdminChatRouteArgs {
+  const AdminChatRouteArgs({
+    this.key,
+    required this.id,
+  });
+
+  final Key? key;
+
+  final String id;
+
+  @override
+  String toString() {
+    return 'AdminChatRouteArgs{key: $key, id: $id}';
+  }
+}
+
+/// generated route for
+/// [ArticlesScreen]
+class ArticlesRoute extends PageRouteInfo<ArticlesRouteArgs> {
+  ArticlesRoute({
+    Key? key,
+    required String type,
+    List<PageRouteInfo>? children,
+  }) : super(
+          ArticlesRoute.name,
+          args: ArticlesRouteArgs(
+            key: key,
+            type: type,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'ArticlesRoute';
+
+  static const PageInfo<ArticlesRouteArgs> page =
+      PageInfo<ArticlesRouteArgs>(name);
+}
+
+class ArticlesRouteArgs {
+  const ArticlesRouteArgs({
+    this.key,
+    required this.type,
+  });
+
+  final Key? key;
+
+  final String type;
+
+  @override
+  String toString() {
+    return 'ArticlesRouteArgs{key: $key, type: $type}';
+  }
 }
 
 /// generated route for
@@ -242,6 +384,20 @@ class ContactsRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [DevelopmentScreen]
+class DevelopmentRoute extends PageRouteInfo<void> {
+  const DevelopmentRoute({List<PageRouteInfo>? children})
+      : super(
+          DevelopmentRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'DevelopmentRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [EmployProfileScreen]
 class EmployProfileRoute extends PageRouteInfo<void> {
   const EmployProfileRoute({List<PageRouteInfo>? children})
@@ -350,6 +506,76 @@ class InquiresRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [MettersScreen]
+class MettersRoute extends PageRouteInfo<void> {
+  const MettersRoute({List<PageRouteInfo>? children})
+      : super(
+          MettersRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'MettersRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [NewsScreen]
+class NewsRoute extends PageRouteInfo<NewsRouteArgs> {
+  NewsRoute({
+    Key? key,
+    required int id,
+    String? type,
+    List<PageRouteInfo>? children,
+  }) : super(
+          NewsRoute.name,
+          args: NewsRouteArgs(
+            key: key,
+            id: id,
+            type: type,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'NewsRoute';
+
+  static const PageInfo<NewsRouteArgs> page = PageInfo<NewsRouteArgs>(name);
+}
+
+class NewsRouteArgs {
+  const NewsRouteArgs({
+    this.key,
+    required this.id,
+    this.type,
+  });
+
+  final Key? key;
+
+  final int id;
+
+  final String? type;
+
+  @override
+  String toString() {
+    return 'NewsRouteArgs{key: $key, id: $id, type: $type}';
+  }
+}
+
+/// generated route for
+/// [NotificationsScreen]
+class NotificationsRoute extends PageRouteInfo<void> {
+  const NotificationsRoute({List<PageRouteInfo>? children})
+      : super(
+          NotificationsRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'NotificationsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [ObjectSingleScreen]
 class ObjectSingleRoute extends PageRouteInfo<ObjectSingleRouteArgs> {
   ObjectSingleRoute({
@@ -439,4 +665,61 @@ class StaffProfileRouteArgs {
   String toString() {
     return 'StaffProfileRouteArgs{key: $key, id: $id}';
   }
+}
+
+/// generated route for
+/// [TenantProfileScreen]
+class TenantProfileRoute extends PageRouteInfo<TenantProfileRouteArgs> {
+  TenantProfileRoute({
+    Key? key,
+    required int id,
+    required int apartmentsId,
+    List<PageRouteInfo>? children,
+  }) : super(
+          TenantProfileRoute.name,
+          args: TenantProfileRouteArgs(
+            key: key,
+            id: id,
+            apartmentsId: apartmentsId,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'TenantProfileRoute';
+
+  static const PageInfo<TenantProfileRouteArgs> page =
+      PageInfo<TenantProfileRouteArgs>(name);
+}
+
+class TenantProfileRouteArgs {
+  const TenantProfileRouteArgs({
+    this.key,
+    required this.id,
+    required this.apartmentsId,
+  });
+
+  final Key? key;
+
+  final int id;
+
+  final int apartmentsId;
+
+  @override
+  String toString() {
+    return 'TenantProfileRouteArgs{key: $key, id: $id, apartmentsId: $apartmentsId}';
+  }
+}
+
+/// generated route for
+/// [UsersChatScreen]
+class UsersChatRoute extends PageRouteInfo<void> {
+  const UsersChatRoute({List<PageRouteInfo>? children})
+      : super(
+          UsersChatRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'UsersChatRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }

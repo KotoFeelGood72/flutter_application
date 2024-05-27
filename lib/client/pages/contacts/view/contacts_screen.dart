@@ -23,15 +23,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
         padding: const EdgeInsets.only(top: 40),
         children: [
           AppBar(
-            title: Text('Contacts',
+            title: const Text('Contacts',
                 style: TextStyle(
                     color: Colors.black, fontWeight: FontWeight.w600)),
             elevation: 0,
             centerTitle: true,
             leading: Container(
-              margin: EdgeInsets.all(13),
+              margin: const EdgeInsets.all(13),
               decoration: BoxDecoration(
-                color: Color(0xFFF6F6F6),
+                color: const Color(0xFFF6F6F6),
                 borderRadius: BorderRadius.circular(100),
               ),
               child: IconButton(
@@ -44,24 +44,24 @@ class _ContactsScreenState extends State<ContactsScreen> {
               ),
             ),
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           _buildAccordionSection(
             context,
             title: 'Unified Contact Center',
             subtitle: 'Comfort Service (24/7)',
             sectionKey: 'contact_center',
             children: [
-              SizedBox(height: 15),
-              ContactsItem(
+              const SizedBox(height: 15),
+              const ContactsItem(
                 text: '+7 (495) 150-08-02',
                 img: 'phone.png',
               ),
-              SizedBox(height: 15),
-              ContactsItem(
+              const SizedBox(height: 15),
+              const ContactsItem(
                 text: 'smart17@smindex.com',
                 img: 'phone.png',
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
             ],
           ),
           _buildAccordionSection(
@@ -71,12 +71,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 'If you have any comments or suggestions regarding the quality of our services, please write to us',
             sectionKey: 'offers_feedback',
             children: [
-              SizedBox(height: 15),
-              ContactsItem(
+              const SizedBox(height: 15),
+              const ContactsItem(
                 text: 'maintenance@sminex.com',
                 img: 'phone.png',
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
             ],
           ),
           _buildAccordionSection(
@@ -85,17 +85,17 @@ class _ContactsScreenState extends State<ContactsScreen> {
             subtitle: 'Mobile Application Technical Support',
             sectionKey: 'technical_support',
             children: [
-              SizedBox(height: 15),
-              ContactsItem(
+              const SizedBox(height: 15),
+              const ContactsItem(
                 text: '+7 (495) 150-08-02',
                 img: 'phone.png',
               ),
-              SizedBox(height: 15),
-              ContactsItem(
+              const SizedBox(height: 15),
+              const ContactsItem(
                 text: 'smart17@smindex.com',
                 img: 'phone.png',
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
             ],
           ),
         ],
@@ -110,82 +110,80 @@ class _ContactsScreenState extends State<ContactsScreen> {
     required String sectionKey,
     required List<Widget> children,
   }) {
-    return Container(
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                sectionIsExpanded[sectionKey] =
-                    !(sectionIsExpanded[sectionKey] ?? false);
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Color.fromRGBO(135, 142, 146, 0.36),
-                      width: 1.0,
-                    ),
-                    bottom: BorderSide(
-                      color: Color.fromRGBO(135, 142, 146, 0.36),
-                      width: 1.0,
-                    ),
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              sectionIsExpanded[sectionKey] =
+                  !(sectionIsExpanded[sectionKey] ?? false);
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            decoration: BoxDecoration(
+                border: const Border(
+                  top: BorderSide(
+                    color: Color.fromRGBO(135, 142, 146, 0.36),
+                    width: 1.0,
                   ),
-                  color: sectionIsExpanded[sectionKey]!
-                      ? Color(0xFFF5F5F5)
-                      : Color.fromARGB(255, 255, 255, 255)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6873D1)),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                              color: Color(0xFF73797C),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
+                  bottom: BorderSide(
+                    color: Color.fromRGBO(135, 142, 146, 0.36),
+                    width: 1.0,
                   ),
-                  Icon(
-                    sectionIsExpanded[sectionKey]!
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                ),
+                color: sectionIsExpanded[sectionKey]!
+                    ? const Color(0xFFF5F5F5)
+                    : const Color.fromARGB(255, 255, 255, 255)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF6873D1)),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                            color: Color(0xFF73797C),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Icon(
+                  sectionIsExpanded[sectionKey]!
+                      ? Icons.expand_less
+                      : Icons.expand_more,
+                ),
+              ],
             ),
           ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            child: ConstrainedBox(
-              constraints: sectionIsExpanded[sectionKey]!
-                  ? BoxConstraints()
-                  : BoxConstraints(maxHeight: 0),
-              child: Column(
-                children: children
-                    .map((child) => Container(
-                          child: child,
-                        ))
-                    .toList(),
-              ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: ConstrainedBox(
+            constraints: sectionIsExpanded[sectionKey]!
+                ? const BoxConstraints()
+                : const BoxConstraints(maxHeight: 0),
+            child: Column(
+              children: children
+                  .map((child) => Container(
+                        child: child,
+                      ))
+                  .toList(),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -205,7 +203,7 @@ class ContactsItem extends StatelessWidget {
     return ListTile(
       leading: Container(
           decoration: BoxDecoration(
-            color: Color(0xFF6873D1),
+            color: const Color(0xFF6873D1),
             borderRadius: BorderRadius.circular(10),
           ),
           width: 35,
@@ -213,7 +211,7 @@ class ContactsItem extends StatelessWidget {
           child: Image.asset('assets/img/$img')),
       title: Text(
         text,
-        style: TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
     );
   }

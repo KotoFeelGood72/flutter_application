@@ -7,6 +7,7 @@ class CardSmall extends StatelessWidget {
   final String img;
   final CardGradient gradient;
   final Widget modal;
+  final int? badgeContent;
 
   const CardSmall({
     super.key,
@@ -14,6 +15,7 @@ class CardSmall extends StatelessWidget {
     this.gradient = CardGradient.first,
     required this.img,
     required this.modal,
+    this.badgeContent,
   });
 
   @override
@@ -46,7 +48,9 @@ class CardSmall extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
           gradient: gradientColors, borderRadius: BorderRadius.circular(15)),
-      child: GestureDetector(
+      child: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: () {
           showModalBottomSheet(
             isScrollControlled: true,
@@ -55,12 +59,9 @@ class CardSmall extends StatelessWidget {
               borderRadius: BorderRadius.circular(0),
             ),
             builder: (BuildContext context) {
-              final double maxHeight = MediaQuery.of(context).size.height * 0.8;
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: maxHeight,
-                ),
+              return Container(
                 child: modal,
+                constraints: BoxConstraints(maxHeight: 650),
               );
             },
           );
@@ -68,22 +69,26 @@ class CardSmall extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned(
-              top: -7,
-              right: -7,
-              child: Container(
-                alignment: Alignment.center,
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                    color: const Color(0xFFBE6161),
-                    borderRadius: BorderRadius.circular(100)),
-                child: const Text(
-                  '1',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
+            if (badgeContent != null)
+              Positioned(
+                top: -7,
+                right: -7,
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFBE6161),
+                      borderRadius: BorderRadius.circular(100)),
+                  child: Text(
+                    badgeContent.toString(),
+                    style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500),
+                  ),
                 ),
               ),
-            ),
             Container(
               width: 116,
               padding: const EdgeInsets.only(
@@ -92,13 +97,13 @@ class CardSmall extends StatelessWidget {
                 children: [
                   Container(
                     alignment: Alignment.centerRight,
-                    child: Image.asset('assets/img/${img}.png'),
+                    child: Image.asset('assets/img/$img.png'),
                   ),
                   Container(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       name,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   )
                 ],

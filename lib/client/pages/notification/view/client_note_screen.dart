@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+@RoutePage()
 class ClientNoteScreen extends StatefulWidget {
   const ClientNoteScreen({super.key});
 
@@ -34,26 +36,21 @@ class _ClientNoteScreenState extends State<ClientNoteScreen> {
     return Scaffold(
       appBar: AppBar(
           centerTitle: true,
-          title: Container(
-            child: const Text(
-              'Notification',
-            ),
+          title: const Text(
+            'Notification',
           )),
-      body: Container(
-        child: ListView.builder(
-          itemCount: notes.length,
-          itemBuilder: (context, index) {
-            var note = notes[index];
-            return NoteItems(
-              title: note['title']!,
-              date: note['date']!,
-              description: note['description']!,
-              viewed: note['viewed'],
-              isLastItem: index ==
-                  notes.length - 1, // Проверяем, последний ли это элемент
-            );
-          },
-        ),
+      body: ListView.builder(
+        itemCount: notes.length,
+        itemBuilder: (context, index) {
+          var note = notes[index];
+          return NoteItems(
+            title: note['title']!,
+            date: note['date']!,
+            description: note['description']!,
+            viewed: note['viewed'],
+            isLastItem: index == notes.length - 1,
+          );
+        },
       ),
     );
   }
@@ -95,42 +92,42 @@ class NoteItems extends StatelessWidget {
             alignment: Alignment.centerLeft,
             children: [
               Container(
-                  margin: EdgeInsets.only(left: 20),
+                  margin: const EdgeInsets.only(left: 20),
                   child: Image.asset('assets/img/notification.png', width: 40)),
               if (!viewed)
                 Container(
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
                 ),
             ],
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   date,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFFA5A5A7),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(description,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.black,
                     )),

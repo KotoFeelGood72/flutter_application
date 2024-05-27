@@ -7,7 +7,9 @@ class UkTextField extends StatelessWidget {
   final int? maxLines;
   final bool isDateField;
   final bool isTimeField;
-  final Widget? suffixIcon; // Параметр для пользовательской иконки
+  final bool enabled;
+  final Widget? suffixIcon;
+  final Color backgroundColor;
 
   const UkTextField({
     super.key,
@@ -16,31 +18,36 @@ class UkTextField extends StatelessWidget {
     this.maxLines = 1,
     this.isDateField = false,
     this.isTimeField = false,
+    this.enabled = true,
     this.suffixIcon,
+    this.backgroundColor = const Color(0xFFF5F5F5),
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _selectDateTime(context),
+      onTap: enabled ? () => _selectDateTime(context) : null,
       child: AbsorbPointer(
         absorbing: isDateField || isTimeField,
         child: TextFormField(
           controller: controller,
           style: const TextStyle(fontSize: 14),
           maxLines: maxLines,
+          enabled: enabled,
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
             hintStyle: const TextStyle(
                 fontSize: 14, color: Colors.black, fontWeight: FontWeight.w400),
-            fillColor: const Color(0xFFF5F5F5),
+            fillColor: backgroundColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
             ),
             suffixIcon: suffixIcon ??
-                (isDateField || isTimeField ? Icon(Icons.chevron_right) : null),
+                (isDateField || isTimeField
+                    ? const Icon(Icons.chevron_right)
+                    : null),
           ),
         ),
       ),

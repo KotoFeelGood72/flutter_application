@@ -6,16 +6,24 @@ import 'package:flutter_application/client/pages/contacts/contacts.dart';
 import 'package:flutter_application/client/pages/home/home.dart';
 import 'package:flutter_application/client/pages/finances/finances.dart';
 import 'package:flutter_application/client/pages/inquires/inquires.dart';
+import 'package:flutter_application/client/pages/metters/metters.dart';
+import 'package:flutter_application/client/pages/news/view/news_screen.dart';
 import 'package:flutter_application/client/pages/notification/client_note.dart';
 import 'package:flutter_application/client/pages/profile/profile.dart';
 import 'package:flutter_application/company/pages/appartaments/company_appartaments.dart';
-import 'package:flutter_application/company/pages/home/screens/company_main_screen.dart';
+import 'package:flutter_application/widget/pages/chat/admin_chat.dart';
+import 'package:flutter_application/company/pages/home/view/company_main_screen.dart';
+import 'package:flutter_application/company/pages/articles/view/view.dart';
+import 'package:flutter_application/company/pages/notifications/notifications.dart';
 import 'package:flutter_application/company/pages/objects/view/object_single_screen.dart';
 import 'package:flutter_application/company/pages/staff/view/staff_profile_screen.dart';
 import 'package:flutter_application/company/pages/users/view/company_profile_screen.dart';
+import 'package:flutter_application/company/pages/users_chat/view/view.dart';
 import 'package:flutter_application/employee/pages/executors/view/executors_profile_screen.dart';
 import 'package:flutter_application/employee/pages/home/view/view.dart';
 import 'package:flutter_application/employee/pages/profile/view/employee_profile_screen.dart';
+import 'package:flutter_application/employee/pages/tenant/tenant_profile.dart';
+import 'package:flutter_application/widget/pages/development/development.dart';
 
 part 'router.gr.dart';
 
@@ -26,6 +34,10 @@ class AppRouter extends _$AppRouter {
         AutoRoute(
           page: HomeRoute.page,
           path: '/clients/home',
+        ),
+        AutoRoute(
+          page: DevelopmentRoute.page,
+          path: '/development',
         ),
         AutoRoute(
             page: FinancesRoute.page,
@@ -49,6 +61,10 @@ class AppRouter extends _$AppRouter {
             path: '/clients/profile',
             guards: [AuthGuard()]),
         AutoRoute(
+            page: MettersRoute.page,
+            path: '/clients/profile',
+            guards: [AuthGuard()]),
+        AutoRoute(
             page: ContactsRoute.page,
             path: '/clients/contacts',
             guards: [AuthGuard()]),
@@ -69,6 +85,22 @@ class AppRouter extends _$AppRouter {
           path: '/company/object/:id',
         ),
         AutoRoute(
+          page: NewsRoute.page,
+          path: '/news/:id',
+        ),
+        AutoRoute(
+          page: NotificationsRoute.page,
+          path: '/notifications',
+        ),
+        AutoRoute(
+          page: AdminChatRoute.page,
+          path: '/messages:id',
+        ),
+        AutoRoute(
+          page: UsersChatRoute.page,
+          path: '/admin-list-chat',
+        ),
+        AutoRoute(
           page: CompanyAppartamentsRoute.page,
           path: '/company/apartments/apartment_info/:id',
         ),
@@ -79,6 +111,10 @@ class AppRouter extends _$AppRouter {
         AutoRoute(
             page: ExecutorsProfileRoute.page,
             path: '/employee/executors/:id',
+            guards: [AuthGuard()]),
+        AutoRoute(
+            page: TenantProfileRoute.page,
+            path: '/employee/tenants/:id',
             guards: [AuthGuard()]),
         AutoRoute(
           page: EmployeHomeMainRoute.page,

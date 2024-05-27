@@ -6,7 +6,7 @@ class AppServices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         width: double.infinity,
         child: Padding(
           padding: const EdgeInsets.only(top: 130),
@@ -34,7 +34,7 @@ class AppServices extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: TextButton(
         onPressed: () {
-          print("Create a request button pressed");
+          // print("Create a request button pressed");
         },
         style: TextButton.styleFrom(
           backgroundColor: const Color(0xFF6873D1),

@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart'; // Добавьте этот импорт
 import 'package:flutter/material.dart';
-import 'package:flutter_application/company/components/uk_dropdown.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/uk_text_field.dart';
+import 'package:flutter_application/models/Appartments.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_application/widget/password_generator.dart';
 
@@ -13,13 +16,15 @@ class AddTenantModal extends StatefulWidget {
 }
 
 class _AddTenantModalState extends State<AddTenantModal> {
-  List<Map<String, dynamic>> apartmentsList = [];
+  Appartaments? appartament;
   String selectedAppartamentId = '';
   String _generatedPassword = '';
   final TextEditingController _firstNameLastNameController =
       TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  bool _isEmailValid = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -32,117 +37,81 @@ class _AddTenantModalState extends State<AddTenantModal> {
   @override
   void initState() {
     super.initState();
-    _getAppartamentsList().then((_) {
-      if (apartmentsList.isNotEmpty) {
-        setState(() {
-          selectedAppartamentId = apartmentsList[0]['id'].toString();
-        });
-      }
-    });
+    _getAppartaments();
   }
 
-  void _onAppartamentSelected(String id) {
-    setState(() {
-      selectedAppartamentId = id;
-    });
-  }
-
-  Future<void> _getAppartamentsList() async {
+  Future<void> _getAppartaments() async {
     try {
       final response = await DioSingleton()
           .dio
-          .get('get_objects_uk/${widget.id}/apartment_list');
-      if (response.data != null && response.data['apartments'] is List) {
-        final List appartaments = response.data['apartments'];
+          .get('employee/apartments/apartment_info/${widget.id}');
+      if (response.data != null && response.data.isNotEmpty) {
         setState(() {
-          apartmentsList = List<Map<String, dynamic>>.from(appartaments);
+          appartament = Appartaments.fromJson(response.data);
         });
       }
-      print(response);
     } catch (e) {
+      // ignore: avoid_print
       print("Ошибка при получении данных: $e");
     }
   }
 
   Future<void> _createTenant() async {
-    final Map<String, dynamic> employee = {
-      // "apartament_id": selectedAppartamentId,
+    final Map<String, dynamic> tenant = {
       "first_last_name": _firstNameLastNameController.text,
       "phone_number": _phoneNumberController.text,
       "email": _emailController.text,
       "password": _generatedPassword
-      // "apartment_name": _nameController.text,
-      // "area": _areaController.text,
     };
 
     try {
       final response = await DioSingleton().dio.post(
-          'employee/apartments/apartment_info/${selectedAppartamentId}/add_tenant',
-          data: employee);
-      Navigator.pop(context);
-      await showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SuccessModal(message: "Tenant has been successfully issued.");
-        },
-      );
-    } catch (e) {
-      print("Объект не создался: $e");
-    }
+          'employee/apartments/apartment_info/${appartament!.id}/add_tenant',
+          data: tenant);
+
+      if (response.statusCode == 201) {
+        Navigator.pop(context);
+        await showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return const SuccessModal(
+                message: "Tenant has been successfully issued.");
+          },
+        );
+      } else {
+        setState(() {
+          _isEmailValid = true;
+        });
+      }
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          Container(
-            padding:
-                const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: 15, right: 15, bottom: 20, top: 20),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Add an tenant',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: const Color.fromARGB(255, 235, 234, 234),
+                const ModalHeader(title: 'Add a tenant'),
+                if (appartament != null)
+                  Container(
+                    height: 50,
+                    margin: const EdgeInsets.only(bottom: 13),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(14)),
+                    child: Text(appartament!.name),
                   ),
-                  child: IconButton(
-                      color: const Color(0xFFB4B7B8),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      padding: EdgeInsets.zero,
-                      iconSize: 12,
-                      icon: const Icon(
-                        Icons.close,
-                      )),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 20),
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: [
-                UkDropdown(
-                  itemsList: apartmentsList,
-                  selectedItemKey: "1",
-                  onSelected: (selectedId) {},
-                  displayValueKey: "apartment_name",
-                  valueKey: "id",
-                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -154,61 +123,27 @@ class _AddTenantModalState extends State<AddTenantModal> {
                           color: Color(0xFF73797C)),
                     ),
                     const SizedBox(height: 10),
-                    TextField(
-                      controller: _firstNameLastNameController,
-                      style: const TextStyle(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'First name Last name',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
+                    UkTextField(
+                        hint: 'First name Last name',
+                        controller: _firstNameLastNameController),
                     const SizedBox(height: 16),
-                    TextField(
-                      style: const TextStyle(fontSize: 14),
+                    UkTextField(
+                      hint: '8 (999) 999-99-99',
                       controller: _phoneNumberController,
-                      decoration: InputDecoration(
-                        hintText: '8 (999) 999-99-99',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      style: const TextStyle(fontSize: 14),
+                    UkTextField(
+                      hint: 'Press email',
                       controller: _emailController,
-                      decoration: InputDecoration(
-                        hintText: 'Press email',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
+                    ),
+                    if (_isEmailValid)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          'Invalid email address',
+                          style: TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
-                      keyboardType: TextInputType.phone,
-                    ),
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -232,7 +167,7 @@ class _AddTenantModalState extends State<AddTenantModal> {
                           _createTenant();
                         },
                         child: const Text(
-                          'Add an employee',
+                          'Add a tenant',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -242,8 +177,8 @@ class _AddTenantModalState extends State<AddTenantModal> {
                     ))
               ],
             ),
-          )
-        ],
+          ),
+        ),
       ),
     );
   }

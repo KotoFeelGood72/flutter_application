@@ -1,93 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
+import 'package:flutter_application/company/components/uk_dropdown.dart';
+import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/toggle_switch.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
-class DeleteEmployeModal extends StatelessWidget {
-  const DeleteEmployeModal({super.key});
+class DeleteEmployeModal extends StatefulWidget {
+  const DeleteEmployeModal({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-        padding:
-            const EdgeInsets.only(top: 30, left: 15, right: 15, bottom: 24),
-        color: Colors.white,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-                margin: const EdgeInsets.only(bottom: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Delete an employee',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                    Container(
-                      width: 24,
-                      height: 24,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: const Color.fromARGB(255, 235, 234, 234),
-                      ),
-                      child: IconButton(
-                          color: const Color(0xFFB4B7B8),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          padding: EdgeInsets.zero,
-                          iconSize: 12,
-                          icon: const Icon(
-                            Icons.close,
-                          )),
-                    ),
-                  ],
-                )),
-            const SizedBox(
-              width: double.infinity,
-              child: ObjectDropDown(),
-            ),
-            Container(
-                margin: EdgeInsets.only(bottom: 26),
-                child: ToggleSwitch(
-                  leftTabName: "Delete an employee",
-                  rightTabName: "Archive an employee",
-                  initialValue: false,
-                  onToggle: (value) {
-                    print("Текущее значение: $value");
-                  },
-                )),
-            Container(
-              width: double.infinity,
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF878E92),
-                  borderRadius: BorderRadius.circular(15)),
-              child: GestureDetector(
-                onTap: () {},
-                child: const Text(
-                  'Delete an employee',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            )
-          ],
-        ));
-  }
+  State<DeleteEmployeModal> createState() => _DeleteEmployeModalState();
 }
 
-class ObjectDropDown extends StatefulWidget {
-  const ObjectDropDown({super.key});
+class _DeleteEmployeModalState extends State<DeleteEmployeModal> {
+  String? dropdownValue;
+  bool isArchive = false;
+  List<Map<String, dynamic>> staffLists = [];
+  Map<String, dynamic> selectedItem = {};
+  bool isLoading = true;
 
-  @override
-  _ObjectDropDownState createState() => _ObjectDropDownState();
-}
-
-class _ObjectDropDownState extends State<ObjectDropDown> {
-  List<Map<String, dynamic>> staffList = [];
   @override
   void initState() {
     super.initState();
@@ -97,53 +29,108 @@ class _ObjectDropDownState extends State<ObjectDropDown> {
   Future<void> _getStaffList() async {
     try {
       final response = await DioSingleton().dio.get('get_staff_uk');
-      if (response.data != null && response.data['staff_uk'] is List) {
-        final List objects = response.data['staff_uk'];
+      if (response.data != null) {
         setState(() {
-          staffList = List<Map<String, dynamic>>.from(objects);
+          staffLists = List<Map<String, dynamic>>.from(response.data);
+          if (staffLists.isNotEmpty) {
+            selectedItem = staffLists.first;
+            dropdownValue = selectedItem['id'].toString();
+          }
+          isLoading = false;
         });
       }
-      print(response);
     } catch (e) {
       print("Ошибка при получении данных: $e");
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
-  String? dropdownValue;
+  Future<void> _deleteEmployee() async {
+    try {
+      if (selectedItem.isNotEmpty) {
+        String endpoint = isArchive ? 'archive' : 'delete';
+        if (isArchive) {
+          await DioSingleton()
+              .dio
+              .put('get_staff_uk/delete/${selectedItem['id']}/archive');
+        } else {
+          await DioSingleton()
+              .dio
+              .delete('get_staff_uk/delete/${selectedItem['id']}');
+        }
+        Navigator.of(context).pop();
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return SuccessModal(
+              message:
+                  "The employee has been successfully ${isArchive ? 'archived' : 'deleted'}",
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print("Ошибка при удалении сотрудника: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: dropdownValue,
-          hint: Text('Select employee'),
-          icon: const Icon(Icons.expand_more_rounded),
-          iconSize: 20,
-          elevation: 16,
-          style: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.w400, fontSize: 14),
-          onChanged: (String? newValue) {
-            setState(() {
-              dropdownValue = newValue;
-            });
-          },
-          items: staffList
-              .map<DropdownMenuItem<String>>((Map<String, dynamic> staff) {
-            String displayValue = '${staff['firstname']} ${staff['lastname']}';
-            return DropdownMenuItem<String>(
-              value: displayValue,
-              child: Text(displayValue),
-            );
-          }).toList(),
-        ),
-      ),
-    );
+    return isLoading
+        ? Container(
+            constraints: BoxConstraints(maxHeight: 300),
+            child: const Center(child: CircularProgressIndicator()))
+        : Container(
+            padding:
+                const EdgeInsets.only(top: 30, left: 15, right: 15, bottom: 24),
+            color: Colors.white,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const ModalHeader(title: 'Delete an employee '),
+                const SizedBox(
+                  height: 20,
+                ),
+                if (staffLists.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    child: UkDropdown(
+                      itemsList: staffLists,
+                      selectedItemKey: dropdownValue,
+                      onSelected: (selectedId) {
+                        var staff = staffLists.firstWhere(
+                          (staff) => staff['id'].toString() == selectedId,
+                          orElse: () => {},
+                        );
+                        setState(() {
+                          selectedItem = staff;
+                          dropdownValue = selectedId;
+                        });
+                      },
+                      displayValueKey:
+                          'first_name', // Передайте ключ отображаемого значения
+                      valueKey: 'id', // Используйте идентификатор для valueKey
+                    ),
+                  ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 26),
+                  child: ToggleSwitch(
+                    leftTabName: "Delete an employee",
+                    rightTabName: "Archive an employee",
+                    initialValue: isArchive,
+                    onToggle: (value) {
+                      setState(() {
+                        isArchive = value;
+                      });
+                    },
+                  ),
+                ),
+                CustomBtn(
+                    title: 'Delete an employee', onPressed: _deleteEmployee),
+              ],
+            ),
+          );
   }
 }

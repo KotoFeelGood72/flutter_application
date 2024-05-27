@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
+import 'package:flutter_application/components/ui/uk_text_field.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_application/widget/password_generator.dart';
 
@@ -40,15 +43,13 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
         final List objects = response.data['objects'];
         setState(() {
           objectList = List<Map<String, dynamic>>.from(objects);
-          // Предполагаем, что у объектов есть поле 'id'
           if (objectList.isNotEmpty) {
             selectedObjectId = objectList.first['id'].toString();
           }
         });
       }
-    } catch (e) {
-      print("Ошибка при получении данных: $e");
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   void _onObjectSelected(String id) {
@@ -57,15 +58,6 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
     });
   }
 
-  // void _showSuccessMessage() {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text("Employee added"),
-  //       duration: Duration(seconds: 4),
-  //     ),
-  //   );
-  // }
-
   Future<void> _createEmployee() async {
     final Map<String, dynamic> employee = {
       "object_id": selectedObjectId,
@@ -73,177 +65,102 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
       "phone_number": _phoneNumberController.text,
       "email": _emailController.text,
       "password": _generatedPassword
-      // "apartment_name": _nameController.text,
-      // "area": _areaController.text,
     };
 
     try {
-      final response = await DioSingleton()
+      // ignore: unused_local_variable
+      await DioSingleton()
           .dio
-          .post('add_employee_uk/${selectedObjectId}', data: employee);
-      Navigator.pop(context);
-      await showModalBottomSheet(
+          .post('add_employee_uk/$selectedObjectId', data: employee);
+      Navigator.of(context).pop();
+      if (!mounted) return;
+      await Future.delayed(Duration.zero);
+      // ignore: use_build_context_synchronously
+      showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return SuccessModal(message: "Employee added");
+          return const SuccessModal(
+              message: "The employee has been successfully added");
         },
       );
-    } catch (e) {
-      print("Объект не создался: $e");
-    }
+
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          Container(
-            padding:
-                const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Add an employee',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: const Color.fromARGB(255, 235, 234, 234),
-                  ),
-                  child: IconButton(
-                      color: const Color(0xFFB4B7B8),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      padding: EdgeInsets.zero,
-                      iconSize: 12,
-                      icon: const Icon(
-                        Icons.close,
-                      )),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 20),
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: [
-                ObjectDropDown(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          padding:
+              const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
+          color: Colors.white,
+          child: Column(
+            children: [
+              const ModalHeader(title: 'Add an employee'),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                child: ObjectDropDown(
                   objectList: objectList,
                   selectedObjectId: selectedObjectId,
                   onSelected: _onObjectSelected,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Basic information',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          color: Color(0xFF73797C)),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Basic information',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Color(0xFF73797C)),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: UkTextField(
+                      hint: 'First name Last name',
                       controller: _firstNameLastNameController,
-                      style: const TextStyle(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'First name Last name',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      style: const TextStyle(fontSize: 14),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: UkTextField(
+                      hint: '8 (999) 999-99-99',
                       controller: _phoneNumberController,
-                      decoration: InputDecoration(
-                        hintText: '8 (999) 999-99-99',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      keyboardType: TextInputType.phone,
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      style: const TextStyle(fontSize: 14),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: UkTextField(
+                      hint: 'Press email',
                       controller: _emailController,
-                      decoration: InputDecoration(
-                        hintText: 'Press email',
-                        filled: true,
-                        hintStyle: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400),
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      keyboardType: TextInputType.phone,
                     ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-                PasswordGenerator(
-                  onPasswordGenerated: (String generatedPassword) {
-                    setState(() {
-                      _generatedPassword = generatedPassword;
-                    });
-                  },
-                ),
-                Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color(0xFF6873D1),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: TextButton(
-                        onPressed: () {
-                          _createEmployee();
-                        },
-                        child: const Text(
-                          'Add an employee',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
-                    ))
-              ],
-            ),
-          )
-        ],
+                  ),
+                ],
+              ),
+              PasswordGenerator(
+                onPasswordGenerated: (String generatedPassword) {
+                  setState(() {
+                    _generatedPassword = generatedPassword;
+                  });
+                },
+              ),
+              CustomBtn(
+                  title: 'Add an employee',
+                  height: 55,
+                  onPressed: () {
+                    _createEmployee();
+                  })
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -262,6 +179,7 @@ class ObjectDropDown extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _ObjectDropDownState createState() => _ObjectDropDownState();
 }
 
@@ -270,7 +188,6 @@ class _ObjectDropDownState extends State<ObjectDropDown> {
   Widget build(BuildContext context) {
     Map<String, dynamic>? selectedObject;
     try {
-      // Пытаемся найти выбранный объект без использования orElse
       selectedObject = widget.objectList.firstWhere(
         (obj) => obj['id'].toString() == widget.selectedObjectId,
       );
@@ -303,6 +220,7 @@ class _ObjectDropDownState extends State<ObjectDropDown> {
               newSelectedObject = widget.objectList.firstWhere(
                 (obj) => obj['object_name'] == newValue,
               );
+              // ignore: empty_catches
             } catch (e) {}
 
             if (newSelectedObject != null) {

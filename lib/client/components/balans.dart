@@ -15,6 +15,7 @@ class Balans extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _BalansState createState() => _BalansState();
 }
 
@@ -44,7 +45,7 @@ class _BalansState extends State<Balans> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
+                  SizedBox(
                     width: 162,
                     child: Text(
                       widget.text, // Используем текст из параметра
@@ -77,7 +78,7 @@ class _BalansState extends State<Balans> {
                       ),
                     ),
                     onPressed: () {
-                      AutoRouter.of(context).push(FinancesRoute());
+                      AutoRouter.of(context).push(const FinancesRoute());
                     },
                     child: const Padding(
                       padding:

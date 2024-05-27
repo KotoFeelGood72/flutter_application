@@ -15,6 +15,7 @@ class ServiceOrdersModal extends StatefulWidget {
 class _ServiceOrdersModalState extends State<ServiceOrdersModal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool isNewServiceViewed = true;
 
   @override
   void initState() {
@@ -26,6 +27,12 @@ class _ServiceOrdersModalState extends State<ServiceOrdersModal>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void updateNewServiceViewStatus(bool isViewed) {
+    setState(() {
+      isNewServiceViewed = isViewed;
+    });
   }
 
   @override
@@ -68,18 +75,19 @@ class _ServiceOrdersModalState extends State<ServiceOrdersModal>
                         clipBehavior: Clip.none,
                         children: [
                           const Text('New'),
-                          Positioned(
-                            left: -25,
-                            top: 7.7,
-                            child: Container(
-                              width: 7,
-                              height: 7,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFBE6161),
-                                shape: BoxShape.circle,
+                          if (!isNewServiceViewed)
+                            Positioned(
+                              left: -25,
+                              top: 7.7,
+                              child: Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFBE6161),
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -95,7 +103,8 @@ class _ServiceOrdersModalState extends State<ServiceOrdersModal>
             child: TabBarView(
               controller: _tabController,
               children: [
-                ServiceNew(id: widget.id),
+                ServiceNew(
+                    id: widget.id, updateIsView: updateNewServiceViewStatus),
                 ServiceProgress(id: widget.id),
                 ServiceCompleted(id: widget.id)
               ],

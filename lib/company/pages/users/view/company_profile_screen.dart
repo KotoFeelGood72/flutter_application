@@ -5,45 +5,22 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_application/company/bloc/company_bloc.dart';
+import 'package:flutter_application/components/bottom_admin_bar.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
+import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
 final _router = AppRouter();
+
 Future<void> _signOut() async {
   try {
     await FirebaseAuth.instance.signOut();
     _router.push(const AuthRoute());
   } catch (e) {
-    print("Ошибка при выходе: $e");
-  }
-}
-
-Future<void> _uploadImg() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.image,
-  );
-
-  if (result != null) {
-    File imageFile = File(result.files.single.path!);
-
-    FormData formData = FormData.fromMap({
-      "photo":
-          await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
-    });
-
-    print(formData.fields);
-    print(formData.files);
-
-    try {
-      final response =
-          await DioSingleton().dio.post('add_photo', data: formData);
-      print('Ответ сервера: $response');
-    } catch (e) {
-      print("Ошибка при загрузке изображения: $e");
-    }
-  } else {
-    // Пользователь отменил выбор файла
-    print("Выбор файла отменен");
+    print("Error on exit: $e");
   }
 }
 
@@ -56,193 +33,147 @@ class CompanyProfileScreen extends StatefulWidget {
 }
 
 class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
-  Map<String?, dynamic> userProfile = {};
-  List<dynamic> contacts = [];
-  String? userImg;
+  bool isLoading = true;
+  bool isUploading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _getUserInfo();
-  }
+  Future<void> _uploadImg() async {
+    setState(() {
+      isUploading = true;
+    });
 
-  Future<void> _getUserInfo() async {
-    try {
-      final response = await DioSingleton().dio.get('get_profile_uk');
-      setState(() {
-        userProfile = response.data;
-        contacts = response.data['contacts'] ?? [];
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      File imageFile = File(result.files.single.path!);
+      String? originalFileName = result.files.single.name;
+
+      FormData formData = FormData.fromMap({
+        "photo": await MultipartFile.fromFile(imageFile.path,
+            filename: originalFileName),
       });
-    } catch (e) {
-      print("Ошибка при получении информации о профиле: $e");
+
+      try {
+        var response = await DioSingleton()
+            .dio
+            .post('get_profile_uk/add_photo', data: formData);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          print("The image has been uploaded successfully");
+          if (mounted) {
+            setState(() {
+              // Update the state after uploading the image
+              context.read<CompanyBloc>().add(CompanyLoaded());
+            });
+          }
+        } else {
+          print("Error loading the image: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error loading the image: $e");
+      } finally {
+        setState(() {
+          isUploading = false; // Set uploading state to false
+        });
+      }
+    } else {
+      print("The file selection has been canceled");
+      setState(() {
+        isUploading = false;
+      });
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    List<Widget> contactWidgets = contacts.map<Widget>((contact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 13),
-              child: Text(contact['name'] ?? 'No name',
-                  style: const TextStyle(
-                      color: Color(0xFF73797C), fontWeight: FontWeight.bold)),
-            ),
-          ),
-          if (contact['phone'] != null)
-            ListInfoItem(
-                title: contact['phone'], icon: 'assets/img/mini-phone.png'),
-          if (contact['email'] != null)
-            ListInfoItem(
-                title: contact['email'], icon: 'assets/img/mini-mail.png'),
-          if (contact['email'] != null)
-            ListInfoItem(
-                title: contact['email'], icon: 'assets/img/mini-mail.png'),
-        ],
-      );
-    }).toList();
+  void initState() {
+    super.initState();
+    context.read<CompanyBloc>().add(CompanyLoaded());
+  }
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(356.0),
-        child: Column(
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
           children: [
-            Container(
-              color: const Color(0xFF18232D),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: AppBar(
-                  title: const Text('Profile',
-                      style: TextStyle(color: Colors.white)),
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF18232D),
-                  centerTitle: true,
-                  leading: Container(
-                    margin: const EdgeInsets.all(13),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: IconButton(
-                      icon: Image.asset(
-                        'assets/img/back.png',
-                        width: 22,
-                        height: 22,
+            BlocBuilder<CompanyBloc, CompanyState>(
+              builder: (context, state) {
+                if (state is CompanyStateData) {
+                  final company = state.company;
+                  final userImg = company!.photoPath;
+                  final contacts = company.contacts ?? [];
+
+                  List<Widget> contactWidgets = contacts.map<Widget>((contact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 13),
+                            child: Text(contact.name ?? 'No name',
+                                style: const TextStyle(
+                                    color: Color(0xFF73797C),
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        if (contact.phone != null)
+                          ListInfoItem(
+                              title: contact.phone.toString(),
+                              icon: 'assets/img/mini-phone.png'),
+                        if (contact.email != null)
+                          ListInfoItem(
+                              title: contact.email,
+                              icon: 'assets/img/mini-mail.png'),
+                      ],
+                    );
+                  }).toList();
+
+                  return ListView(
+                    shrinkWrap: true,
+                    children: [
+                      UserProfileHeader(
+                        imageNetwork: userImg ?? '',
+                        imageAsset: 'assets/img/profile-big.png',
+                        userName: company.ukName,
+                        onAddPhotoPressed: _uploadImg,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: ListView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          children: [
+                            ...contactWidgets,
+                            CustomBtn(
+                              title: 'Logout',
+                              onPressed: _signOut,
+                              color: Color(0xFFBE6161),
+                            ),
+                            const SizedBox(height: 30)
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (state is CompanyInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  return const Center(
+                      child: Text('Failed to load company data'));
+                }
+              },
+            ),
+            if (isUploading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
-            ),
-            Container(
-              color: const Color(0xFF18232D),
-              width: double.infinity,
-              child: Column(children: <Widget>[
-                Container(
-                  width: 103,
-                  height: 103,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(103 / 2),
-                    color: Colors.transparent,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: const Color.fromRGBO(255, 255, 255, 0.2),
-                      ),
-                      child: Image.asset('assets/img/profile-big.png'),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor:
-                          const Color.fromRGBO(255, 255, 255, 0.32),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    onPressed: _uploadImg,
-                    child: const Padding(
-                      padding: EdgeInsets.only(
-                          top: 5, bottom: 5, left: 20, right: 20),
-                      child: Text(
-                        'Add photo',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 20, bottom: 5),
-                      child: Text(
-                        '${userProfile['UK name']}',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20)
-              ]),
-            ),
           ],
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              ...contactWidgets,
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _signOut,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color(0xFF878E92)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(14.0),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30)
-            ],
-          ),
-        ),
+        bottomNavigationBar: BottomAdminBar(),
       ),
     );
   }

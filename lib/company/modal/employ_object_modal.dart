@@ -1,5 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
+import 'package:flutter_application/company/modal/ModalAdd/add_object_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
+import 'package:flutter_application/components/ui/default_list_card.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
@@ -22,119 +26,54 @@ class _EmployObjectModalState extends State<EmployObjectModal> {
   Future<void> _getObjectList() async {
     try {
       final response = await DioSingleton().dio.get('get_objects_uk');
-      // Предполагая, что response.data - это Map<String, dynamic>, где есть ключ "objects"
       if (response.data != null && response.data['objects'] is List) {
         final List objects = response.data['objects'];
         setState(() {
           objectList = List<Map<String, dynamic>>.from(objects);
         });
       }
-      print(response);
-    } catch (e) {
-      print("Ошибка при получении данных: $e");
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
       child: Column(
         children: [
-          Container(
-            padding:
-                const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Objects',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: const Color.fromARGB(255, 235, 234, 234),
-                  ),
-                  child: IconButton(
-                      color: const Color(0xFFB4B7B8),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      padding: EdgeInsets.zero,
-                      iconSize: 12,
-                      icon: const Icon(
-                        Icons.close,
-                      )),
-                ),
-              ],
-            ),
-          ),
+          const ModalHeader(title: 'Objects'),
+          const SizedBox(height: 10),
           Expanded(
             child: ListView(
               shrinkWrap: true,
               children: objectList.map((object) {
-                return EmployCardObjects(
+                return DefaultListCard(
                   id: object['id'],
                   name: object['object_name'] ?? 'No Name',
                   address: object['object_address'] ?? 'No Address',
+                  imageUrl: 'assets/img/house.png',
+                  route: ObjectSingleRoute(id: object['id']),
                 );
               }).toList(),
             ),
-          )
+          ),
+          CustomBtn(
+              title: 'Add an object',
+              onPressed: () {
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  builder: (BuildContext context) {
+                    return const AddObjectModal();
+                  },
+                );
+              })
         ],
-      ),
-    );
-  }
-}
-
-class EmployCardObjects extends StatelessWidget {
-  final String name;
-  final String address;
-  final int id;
-  const EmployCardObjects(
-      {super.key, required this.name, required this.address, required this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        AutoRouter.of(context).push(ObjectSingleRoute(id: id));
-      },
-      child: Padding(
-        padding:
-            const EdgeInsets.only(left: 15, top: 15, bottom: 15, right: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(right: 19),
-                  child: Image.asset('assets/img/house.png'),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      address,
-                      style: const TextStyle(
-                          fontSize: 12, color: Color(0xFFA5A5A7)),
-                    )
-                  ],
-                ),
-              ],
-            ),
-            const Icon(Icons.chevron_right)
-          ],
-        ),
       ),
     );
   }

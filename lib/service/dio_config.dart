@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DioSingleton {
   static final DioSingleton _instance = DioSingleton._internal();
@@ -18,9 +19,13 @@ class DioSingleton {
     };
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        String? token = await _getFirebaseToken();
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
+        String? firebaseToken = await _getFirebaseToken();
+        String? deviceToken = await _getDeviceToken();
+        if (firebaseToken != null) {
+          options.headers['Authorization'] = 'Bearer $firebaseToken';
+        }
+        if (deviceToken != null) {
+          options.headers['device-token'] = deviceToken;
         }
         return handler.next(options);
       },
@@ -36,6 +41,16 @@ class DioSingleton {
       }
     } catch (e) {
       print("Ошибка получения токена Firebase: $e");
+    }
+    return null;
+  }
+
+  Future<String?> _getDeviceToken() async {
+    try {
+      final String? token = await FirebaseMessaging.instance.getToken();
+      return token;
+    } catch (e) {
+      print("Ошибка получения токена устройства: $e");
     }
     return null;
   }

@@ -1,41 +1,125 @@
 import 'dart:io';
-import 'package:path/path.dart' as path;
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
+import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
+import 'package:flutter_application/components/ui/uk_text_field.dart';
+import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_application/components/ui/custom_dropdown.dart';
-import 'package:flutter_application/components/ui/toggle_switch.dart';
-import 'package:image_picker/image_picker.dart'; // Необходимо добавить в pubspec.yaml
+import 'package:flutter_application/models/user_item_news.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddNewsModal extends StatefulWidget {
-  AddNewsModal({Key? key}) : super(key: key);
+  const AddNewsModal({Key? key}) : super(key: key);
 
   @override
   State<AddNewsModal> createState() => _AddNewsModalState();
 }
 
 class _AddNewsModalState extends State<AddNewsModal> {
+  late TextEditingController _titleController;
   late TextEditingController _textarea;
   final List<XFile> _mediaList = [];
+  List<UserItemNews> userItemNewsList = [];
+  UserItemNews? selectedUserItem;
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController();
     _textarea = TextEditingController();
+    _getClientMetters();
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _textarea.dispose();
     super.dispose();
   }
 
   Future<void> _pickMedia() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    if (_mediaList.isNotEmpty) {
+      return; // Already one image is added
+    }
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? file = await picker.pickImage(source: ImageSource.gallery);
     if (file != null) {
       setState(() {
         _mediaList.add(file);
       });
+    }
+  }
+
+  Future<void> _getClientMetters() async {
+    try {
+      final response = await DioSingleton().dio.get('add-news');
+      List<UserItemNews> fetchedList = (response.data as List)
+          .map((json) => UserItemNews.fromJson(json))
+          .toList();
+
+      if (!fetchedList.any((item) => item.name == 'All users')) {
+        fetchedList.insert(0, UserItemNews(id: -1, name: 'All users'));
+      }
+
+      setState(() {
+        userItemNewsList = fetchedList;
+        selectedUserItem = fetchedList.firstWhere(
+          (item) => item.name == 'All users',
+          orElse: () => fetchedList[0],
+        );
+      });
+
+      // Отладочная информация
+      print('Fetched list: ${fetchedList.map((e) => e.name).toList()}');
+      print('Selected user item: ${selectedUserItem?.name}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _showSuccessMessage() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return const SuccessModal(
+          message: "The order has been successfully added in progress",
+        );
+      },
+    );
+  }
+
+  Future<void> _createNews() async {
+    if (_titleController.text.isEmpty ||
+        _textarea.text.isEmpty ||
+        selectedUserItem == null) {
+      print("Please fill all fields");
+      return;
+    }
+
+    FormData formData = FormData.fromMap({
+      "name": _titleController.text,
+      "description": _textarea.text,
+      "apartment_id": selectedUserItem!.id,
+      if (_mediaList.isNotEmpty)
+        "photo": await MultipartFile.fromFile(
+          _mediaList[0].path,
+          filename: _mediaList[0].path.split('/').last,
+        ),
+    });
+
+    try {
+      final response =
+          await DioSingleton().dio.post('add-news', data: formData);
+      Navigator.pop(context);
+      _showSuccessMessage();
+    } catch (e) {
+      // print("Error creating news: $e");
+      if (e is DioError) {
+        print('Dio error: ${e.response?.statusCode} ${e.response?.data}');
+      }
     }
   }
 
@@ -45,203 +129,155 @@ class _AddNewsModalState extends State<AddNewsModal> {
     });
   }
 
+  void _onDropdownChanged(UserItemNews selectedItem) {
+    setState(() {
+      selectedUserItem = selectedItem;
+    });
+    print('Selected item: ${selectedItem.name}, ID: ${selectedItem.id}');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(top: 30, left: 15, right: 15, bottom: 24),
-      color: Colors.white,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Add News',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: const Color.fromARGB(255, 235, 234, 234),
-                  ),
-                  child: IconButton(
-                      color: const Color(0xFFB4B7B8),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      padding: EdgeInsets.zero,
-                      iconSize: 12,
-                      icon: const Icon(
-                        Icons.close,
-                      )),
-                ),
-              ],
+    return SingleChildScrollView(
+      child: Container(
+        padding:
+            const EdgeInsets.only(top: 30, left: 15, right: 15, bottom: 24),
+        color: Colors.white,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ModalHeader(title: 'Add a news'),
+            UkTextField(
+              hint: 'Press title news',
+              controller: _titleController,
             ),
-          ),
-          Container(
-            constraints: BoxConstraints(minHeight: 300),
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _textarea,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        style: const TextStyle(fontSize: 14),
-                        decoration: const InputDecoration(
-                          hintText: 'Text',
-                          hintStyle: TextStyle(color: Colors.black),
-                          contentPadding: EdgeInsets.zero,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
+            const SizedBox(height: 10),
+            Container(
+              constraints: const BoxConstraints(minHeight: 300),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: const Color(0xFFF5F5F5)),
+                          child: TextFormField(
+                            controller: _textarea,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: const InputDecoration(
+                              hintText: 'Press text',
+                              hintStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400),
+                              contentPadding: EdgeInsets.zero,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      width: 79,
-                      height: 53,
-                      decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(15)),
-                      child: GestureDetector(
-                        onTap: _pickMedia,
-                        child: Transform.rotate(
-                          angle: 45 * 3.141592653589793238 / 180,
-                          child: const Icon(
-                            Icons.attach_file,
-                            color: Color(0xFFA5A5A7),
+                      const SizedBox(width: 10),
+                      if (_mediaList.isEmpty)
+                        Container(
+                          width: 79,
+                          height: 53,
+                          decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(15)),
+                          child: InkWell(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: _pickMedia,
+                            child: Transform.rotate(
+                              angle: 45 * 3.141592653589793238 / 180,
+                              child: const Icon(
+                                Icons.attach_file,
+                                color: Color(0xFFA5A5A7),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                _mediaList.isNotEmpty
-                    ? Container(
-                        padding: const EdgeInsets.only(
-                            left: 15, right: 15, bottom: 15),
-                        decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(15)),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: _mediaList.length,
-                          itemBuilder: (context, index) {
-                            String fileName = path.basenameWithoutExtension(
-                                _mediaList[index].path);
-                            return Container(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Color(0xFFA5A5A7),
-                                    width: 1.0,
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _mediaList.isNotEmpty
+                      ? Container(
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(right: 15, bottom: 15),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(5),
+                                child: Image.file(
+                                  File(_mediaList[0].path),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: InkWell(
+                                  hoverColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
+                                  onTap: () => _removeMedia(0),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                                255, 255, 255, 255)
+                                            .withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(2)),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Color.fromARGB(255, 185, 64, 55),
+                                      size: 14,
+                                    ),
                                   ),
                                 ),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 10),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(100),
-                                      child: Image.file(
-                                        File(_mediaList[index].path),
-                                        width: 30,
-                                        height: 30,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      fileName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  GestureDetector(
-                                    onTap: () => _removeMedia(index),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(2),
-                                      decoration: BoxDecoration(
-                                          color: const Color(0xFFF5F5F5),
-                                          borderRadius:
-                                              BorderRadius.circular(2)),
-                                      child: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : Container()
-              ],
+                            ],
+                          ),
+                        )
+                      : Container()
+                ],
+              ),
             ),
-          ),
-          Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 9),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Publishing Options',
-                  style: TextStyle(
-                      color: Color(0xFF73797C), fontWeight: FontWeight.w500),
-                ),
-              ),
-              ToggleSwitch(
-                leftTabName: "Push notification",
-                rightTabName: "Email notification",
-                initialValue: false,
-                onToggle: (value) {
-                  print("Текущее значение: $value");
-                },
-              ),
-              const SizedBox(height: 10),
-              CustomDropdown(),
-              const SizedBox(height: 20),
-              Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: const Color(0xFF6873D1),
+            Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 9),
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    'Publishing Options',
+                    style: TextStyle(
+                        color: Color(0xFF73797C), fontWeight: FontWeight.w500),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'To publish',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400),
-                      ),
-                    ),
-                  ))
-            ],
-          )
-        ],
+                ),
+                const SizedBox(height: 10),
+                CustomDropdown(
+                  list: userItemNewsList,
+                  onChanged: _onDropdownChanged,
+                  initialValue: selectedUserItem,
+                ),
+                const SizedBox(height: 20),
+                CustomBtn(
+                  title: 'To publish',
+                  onPressed: _createNews,
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

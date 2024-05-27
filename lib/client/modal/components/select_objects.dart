@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
 
-class ApartmentInfo {
-  final int id;
-  final String name;
-
-  ApartmentInfo({required this.id, required this.name});
-
-  factory ApartmentInfo.fromJson(Map<String, dynamic> json) {
-    return ApartmentInfo(
-      id: json['id'],
-      name: json['name'],
-    );
-  }
-}
-
 class SelectObjects extends StatefulWidget {
+  const SelectObjects({super.key});
+
   @override
   State<SelectObjects> createState() => _SelectObjectsState();
 }
 
 class _SelectObjectsState extends State<SelectObjects> {
   late ClientBloc _clientBloc;
-  ApartmentInfo? _selectedApartment; // Для хранения выбранной квартиры
+  ApartmentInfo? _selectedApartment;
 
   @override
   void initState() {
     super.initState();
-    _clientBloc = BlocProvider.of<ClientBloc>(context, listen: false);
-    _clientBloc.add(
-        ClientInfoUser()); // Запускаем событие загрузки данных пользователя
+    _clientBloc = BlocProvider.of<ClientBloc>(context);
+    _clientBloc.add(ClientInfoUser());
+
+    final currentState = _clientBloc.state;
+    if (currentState.activeApartment != null) {
+      _selectedApartment = currentState.activeApartment;
+    }
   }
 
   @override
@@ -40,52 +33,106 @@ class _SelectObjectsState extends State<SelectObjects> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Select an object',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
+            const ModalHeader(title: 'Select an object'),
+            const SizedBox(height: 20),
             Expanded(
-              child: BlocBuilder<ClientBloc, ClientState>(
-                builder: (context, state) {
-                  if (state is ClientInfoUsers) {
-                    var apartments = (state.userInfo['apartment_info'] as List)
-                        .map((e) => ApartmentInfo.fromJson(e))
-                        .toList();
-
-                    return ListView(
-                      children: apartments.map((apartment) {
-                        return ListTile(
-                          title: ObjectTile(
-                              title: apartment.name,
-                              subtitle: 'ID: ${apartment.id}'),
-                          leading: Radio<ApartmentInfo>(
-                            value: apartment,
-                            groupValue: _selectedApartment,
-                            onChanged: (ApartmentInfo? value) {
-                              setState(() {
-                                _selectedApartment = value;
-                              });
-                              // Отправляем событие в Bloc при выборе квартиры
-                              _clientBloc.add(SetActiveApartmentEvent(
-                                  id: value!.id, name: value.name));
-                            },
-                          ),
-                        );
-                      }).toList(),
-                    );
+              child: BlocListener<ClientBloc, ClientState>(
+                listener: (context, state) {
+                  if (state.userInfo != null &&
+                      state.userInfo!.apartmentInfo != null) {
+                    List<ApartmentInfo> apartments =
+                        state.userInfo!.apartmentInfo ?? [];
+                    if (_selectedApartment == null && apartments.isNotEmpty) {
+                      setState(() {
+                        _selectedApartment = apartments.first;
+                      });
+                    }
                   }
-                  return const Center(child: CircularProgressIndicator());
                 },
+                child: BlocBuilder<ClientBloc, ClientState>(
+                  builder: (context, state) {
+                    if (state is ClientState &&
+                        state.userInfo != null &&
+                        state.userInfo!.apartmentInfo != null) {
+                      List<ApartmentInfo> apartments =
+                          state.userInfo!.apartmentInfo ?? [];
+
+                      // var apartments = (state.userInfo!.apartmentInfo as List)
+                      //     .map((e) =>
+                      //         ApartmentInfo.fromJson(e as Map<String, dynamic>))
+                      //     .toList();
+
+                      return ListView.builder(
+                        itemCount: apartments.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: EdgeInsets.only(
+                                bottom:
+                                    index == apartments.length - 1 ? 0 : 15),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: index == apartments.length - 1
+                                      ? Colors.transparent
+                                      : const Color.fromARGB(69, 158, 158, 158),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: InkWell(
+                              hoverColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              onTap: () {
+                                setState(() {
+                                  _selectedApartment = apartments[index];
+                                });
+                                _clientBloc.add(SetActiveApartmentEvent(
+                                    id: apartments[index].id,
+                                    name: apartments[index].name));
+                              },
+                              child: Row(
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 20),
+                                    child: SquareRadio<ApartmentInfo>(
+                                      value: apartments[index],
+                                      groupValue: _selectedApartment,
+                                      onChanged: (ApartmentInfo? value) {
+                                        if (value != null) {
+                                          setState(() {
+                                            _selectedApartment = value;
+                                          });
+                                          _clientBloc.add(
+                                              SetActiveApartmentEvent(
+                                                  id: value.id,
+                                                  name: value.name));
+                                        }
+                                      },
+                                      activeColor:
+                                          Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  ObjectTile(
+                                    title: apartments[index].name,
+                                    subtitle: 'ID: ${apartments[index].id}',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
               ),
             ),
+            if (_selectedApartment != null)
+              Text('Selected Apartment: ${_selectedApartment!.name}')
+            else
+              const Text('No Apartment Selected')
           ],
         ),
       ),
@@ -95,7 +142,7 @@ class _SelectObjectsState extends State<SelectObjects> {
 
 class ObjectTile extends StatelessWidget {
   const ObjectTile({super.key, required this.title, required this.subtitle});
-  // Props
+
   final String title;
   final String subtitle;
 
@@ -110,6 +157,45 @@ class ObjectTile extends StatelessWidget {
         Text(subtitle,
             style: const TextStyle(color: Color(0xFF878E92), fontSize: 14)),
       ],
+    );
+  }
+}
+
+class SquareRadio<T> extends StatelessWidget {
+  final T value;
+  final T? groupValue;
+  final ValueChanged<T?> onChanged;
+  final Color activeColor;
+
+  const SquareRadio({
+    Key? key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+    this.activeColor = Colors.blue,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onChanged(value),
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          color: value == groupValue ? activeColor : Colors.transparent,
+          border: Border.all(
+            color: value == groupValue
+                ? activeColor
+                : const Color.fromARGB(110, 158, 158, 158),
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: value == groupValue
+            ? Icon(Icons.check, size: 14, color: Colors.white)
+            : null,
+      ),
     );
   }
 }

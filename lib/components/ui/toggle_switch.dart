@@ -6,7 +6,7 @@ class ToggleSwitch extends StatefulWidget {
   final bool initialValue;
   final Function(bool) onToggle;
 
-  ToggleSwitch({
+  const ToggleSwitch({
     Key? key,
     required this.leftTabName,
     required this.rightTabName,
@@ -15,6 +15,7 @@ class ToggleSwitch extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ToggleSwitchState createState() => _ToggleSwitchState();
 }
 
@@ -37,7 +38,7 @@ class _ToggleSwitchState extends State<ToggleSwitch> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 7, right: 12, left: 12, bottom: 7),
+      padding: const EdgeInsets.only(top: 7, right: 12, left: 12, bottom: 7),
       width: double.infinity,
       height: 47,
       decoration: BoxDecoration(
@@ -62,7 +63,8 @@ class _ToggleSwitchState extends State<ToggleSwitch> {
                 child: Text(
                   widget.leftTabName, // Используйте переданное имя
                   style: TextStyle(
-                    color: !isEmailActive ? Colors.black : Color(0xFF6C6770),
+                    color:
+                        !isEmailActive ? Colors.black : const Color(0xFF6C6770),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -85,7 +87,8 @@ class _ToggleSwitchState extends State<ToggleSwitch> {
                 child: Text(
                   widget.rightTabName, // Используйте переданное имя
                   style: TextStyle(
-                    color: isEmailActive ? Colors.black : Color(0xFF6C6770),
+                    color:
+                        isEmailActive ? Colors.black : const Color(0xFF6C6770),
                     fontWeight: FontWeight.w500,
                   ),
                 ),

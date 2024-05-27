@@ -1,11 +1,13 @@
-import 'dart:convert';
+// ignore_for_file: library_private_types_in_public_api
 
+import 'dart:convert';
+import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
+// import 'package:dio/dio.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
 class RegistrationTab extends StatefulWidget {
@@ -18,12 +20,12 @@ class RegistrationTab extends StatefulWidget {
 class _RegistrationTabState extends State<RegistrationTab> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final Dio _dio = Dio(); // Создание экземпляра Dio
+  // final Dio _dio = Dio();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
-  String? _selectedRole; // Для хранения выбранной роли
+  String? _selectedRole;
   final List<String> _roles = [
     'Administrator',
     'Employee',
@@ -63,8 +65,6 @@ class _RegistrationTabState extends State<RegistrationTab> {
             'role': _selectedRole,
           });
           final String? token = await userCredential.user!.getIdToken();
-
-          print('Новый токен: ${token}');
           if (token != null) {
             await _sendTokenToServer(token);
           }
@@ -72,6 +72,7 @@ class _RegistrationTabState extends State<RegistrationTab> {
           if (!mounted) return;
           AutoRouter.of(context).replace(const HomeRoute());
         }
+        // ignore: unused_catch_clause
       } on FirebaseAuthException catch (e) {
         if (!mounted) return;
       }
@@ -82,14 +83,13 @@ class _RegistrationTabState extends State<RegistrationTab> {
 
   Future<void> _sendTokenToServer(String token) async {
     try {
+      // ignore: unused_local_variable
       final response = await DioSingleton().dio.post(
             'register',
             data: jsonEncode({'uuid': token}),
           );
-      print('Ответ сервера: ${response.data}');
-    } catch (e) {
-      print('Ошибка при отправке токена на сервер: $e');
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   @override
@@ -226,20 +226,12 @@ class _RegistrationTabState extends State<RegistrationTab> {
                       hint: const Text('Role'),
                     ),
                     const SizedBox(height: 15),
-                    Container(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            // primary: const Color(0xFF6873D1),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 20),
-                          ),
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(color: Colors.white),
-                          )),
-                    )
+                    CustomBtn(
+                      title: 'Sign Up',
+                      height: 50,
+                      borderRadius: 5,
+                      onPressed: _register,
+                    ),
                   ],
                 ),
               ),

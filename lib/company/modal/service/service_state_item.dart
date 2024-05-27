@@ -12,6 +12,7 @@ class ServiceStateItem extends StatelessWidget {
   final String? price;
   final String? statusOther;
   final void Function()? onTap;
+  final bool? isView;
 
   const ServiceStateItem({
     super.key,
@@ -25,6 +26,7 @@ class ServiceStateItem extends StatelessWidget {
     this.price,
     this.statusOther,
     this.onTap,
+    this.isView,
   });
 
   @override
@@ -48,7 +50,10 @@ class ServiceStateItem extends StatelessWidget {
       default:
         break;
     }
-    return GestureDetector(
+
+    return InkWell(
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -57,72 +62,74 @@ class ServiceStateItem extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(right: 11),
-                  width: 41,
-                  height: 42,
-                  child: (img != null)
-                      ? Image.network(img!)
-                      : Container(color: Colors.grey),
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
+                if (img != null)
+                  Container(
+                    margin: const EdgeInsets.only(right: 11),
+                    width: 41,
+                    height: 42,
+                    child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          '№ ${id}',
-                          style: const TextStyle(
-                              color: Color(0xFFA5A5A7), fontSize: 12),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              time,
-                              style: const TextStyle(
-                                  color: Color(0xFFA5A5A7), fontSize: 12),
+                        Image.network(img!),
+                        if (isView == false)
+                          Positioned(
+                            top: -1,
+                            right: -1,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                            if (price != null)
-                              Text(
-                                price!,
+                          ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w500)),
+                      Text('№ $id',
+                          style: const TextStyle(
+                              color: Color(0xFFA5A5A7), fontSize: 12)),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(time,
+                              style: const TextStyle(
+                                  color: Color(0xFFA5A5A7), fontSize: 12)),
+                          if (price != null)
+                            Text(price!,
                                 style: const TextStyle(
                                     color: Color(0xFF5F6A73),
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            if (statusOther != null)
-                              ItemStatus(status: statusOther.toString()),
-                          ],
+                                    fontWeight: FontWeight.w500)),
+                          if (statusOther != null)
+                            ItemStatus(status: statusOther!),
+                        ],
+                      ),
+                      if (description != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: description!
+                                .map((desc) => Text(desc,
+                                    style: const TextStyle(
+                                        color: Color(0xFF5F6A73),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)))
+                                .toList(),
+                          ),
                         ),
-                        const SizedBox(height: 15),
-                        Row(
-                          children: [
-                            if (description != null)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: description!
-                                    .map((desc) => Text(
-                                          desc,
-                                          style: const TextStyle(
-                                              color: Color(0xFF5F6A73),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600),
-                                        ))
-                                    .toList(),
-                              ),
-                          ],
-                        )
-                      ],
-                    ),
+                    ],
                   ),
                 ),
                 if (statusText != null && statusColor != null)
@@ -131,39 +138,33 @@ class ServiceStateItem extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
                     decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(25)),
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
                     child: Text(statusText,
-                        style: TextStyle(
-                            color: statusColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500)),
+                        style: const TextStyle(
+                            fontSize: 10, fontWeight: FontWeight.w500)),
                   ),
                 if (times != null)
-                  Container(
-                    margin: const EdgeInsets.only(top: 5),
-                    child: Text(
-                      times!,
-                      style: const TextStyle(
-                        color: Color(0xFFA5A5A7),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Text(
+                    times!,
+                    style: const TextStyle(
+                      color: Color(0xFFA5A5A7),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
               ],
             ),
-            Container(
-              alignment: Alignment.centerRight,
-              margin: const EdgeInsets.only(top: 20),
-              child: IconButton(
-                onPressed: () {},
-                iconSize: 22,
-                icon: const Icon(Icons.chevron_right),
-                color: const Color(0xFFA5A5A7),
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                hoverColor: Colors.transparent,
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                child: const Icon(
+                  Icons.chevron_right,
+                  size: 22,
+                ),
               ),
             ),
           ],

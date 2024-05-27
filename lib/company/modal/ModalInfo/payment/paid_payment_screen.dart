@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/modal/ModalInfo/payment/info_paid_modal.dart';
 import 'package:flutter_application/company/modal/service/service_state_item.dart';
+import 'package:flutter_application/models/Payment.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_application/widget/empty_state.dart';
 
 class PaidPaymentScreen extends StatefulWidget {
   final int id;
@@ -11,129 +14,95 @@ class PaidPaymentScreen extends StatefulWidget {
 }
 
 class _PaidPaymentScreenState extends State<PaidPaymentScreen> {
-  List<Map<String, dynamic>> services = [];
-  Future<void> _getMetters() async {
+  DayList? payments;
+  bool isLoading = true;
+
+  Future<void> _getInvoiceUnPaid() async {
     try {
       final response = await DioSingleton().dio.get(
-          'employee/apartments/apartment_info/${widget.id}/meter_readings');
-      setState(() {
-        services = response.data;
-      });
+          'employee/apartments/apartment_info/${widget.id}/payment-history/paid');
+      if (response.data != null) {
+        setState(() {
+          payments = DayList.fromJson(response.data as List<dynamic>);
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      print("Ошибка при получении информации о профиле: $e");
+      print("Ошибка при получении данных: $e");
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _getMetters();
+    _getInvoiceUnPaid();
   }
 
-  // final List<Map<String, dynamic>> services = [
-  //   {
-  //     'name': 'Today',
-  //     'services': [
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     'name': 'Yesterday',
-  //     'services': [
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     'name': 'Yesterday',
-  //     'services': [
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //       {
-  //         'img': 'assets/img/electrity.png',
-  //         'name': '12-2 Floor-2nd, Smart, 17',
-  //         'id': '№ 929809',
-  //         'time': '12:15',
-  //         'statusOther': 'paid',
-  //         'price': 'The amount'
-  //       },
-  //     ],
-  //   },
-  // ];
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: ListView.builder(
-        // physics: NeverScrollableScrollPhysics(),
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (payments == null || payments!.days.isEmpty) {
+      return const EmptyState(
+        title: "No payment information available",
+        text: '',
+        url:
+            'https://lottie.host/5268f534-057c-41e8-a452-caae0c1a1307/8G8EI88wA5.json',
+      );
+    } else {
+      return ListView.builder(
         shrinkWrap: true,
-        itemCount: services.length,
+        itemCount: payments!.days.length,
         itemBuilder: (context, index) {
-          final day = services[index];
+          final day = payments!.days[index];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  day['name'],
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  day.name,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
               ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: day['services'].length,
+                itemCount: day.services.length,
                 itemBuilder: (context, serviceIndex) {
-                  final service = day['services'][serviceIndex];
+                  final service = day.services[serviceIndex];
                   return ServiceStateItem(
-                    img: service['img'],
-                    name: service['name'],
-                    id: service['id'],
-                    time: service['time'],
-                    price: service['price'],
-                    statusOther: service['statusOther'],
-                  );
+                      onTap: () {
+                        Navigator.pop(context);
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                          builder: (BuildContext context) {
+                            return InfoPaidModal(
+                              id: service.id,
+                              appartamentId: widget.id,
+                            );
+                          },
+                        );
+                      },
+                      name: service.apartmentName,
+                      id: service.id.toString(),
+                      time: service.createdAt,
+                      statusOther: service.status,
+                      price: 'The amount');
                 },
               ),
             ],
           );
         },
-      ),
-    );
+      );
+    }
   }
 }

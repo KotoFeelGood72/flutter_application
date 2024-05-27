@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/models/CompanyInfo.dart';
+import 'package:flutter_application/widget/empty_state.dart';
 
 class RequisitesCard extends StatefulWidget {
-  final dynamic content;
-  const RequisitesCard({super.key, required this.content});
+  final Requisites? content;
+  final EdgeInsetsGeometry padding;
+  final double? cardHeight;
+
+  const RequisitesCard({
+    super.key,
+    this.content,
+    this.padding = const EdgeInsets.all(8.0),
+    this.cardHeight,
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _RequisitesCardState createState() => _RequisitesCardState();
 }
 
 class _RequisitesCardState extends State<RequisitesCard> {
-  bool isExpanded = false;
+  bool isExpanded = true;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(8.0),
+      padding: widget.padding,
       child: Column(
         children: [
           Container(
+            height: widget.cardHeight,
             decoration: BoxDecoration(
               color: isExpanded
                   ? const Color(0xFFE1E1E1)
@@ -25,16 +37,13 @@ class _RequisitesCardState extends State<RequisitesCard> {
               borderRadius: isExpanded
                   ? const BorderRadius.only(
                       topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    )
+                      topRight: Radius.circular(10))
                   : BorderRadius.circular(10),
             ),
-            child: InkWell(
-              highlightColor: Colors.transparent,
+            child: GestureDetector(
               child: ListTile(
                 splashColor: Colors.transparent,
-                minVerticalPadding: 20,
-                title: Text(
+                title: const Text(
                   'Bank requisites',
                   style: TextStyle(
                     fontSize: 16,
@@ -52,13 +61,23 @@ class _RequisitesCardState extends State<RequisitesCard> {
               ),
             ),
           ),
-          isExpanded ? _buildExpandedContent() : Container(),
+          if (isExpanded) _buildExpandedContent(),
         ],
       ),
     );
   }
 
   Widget _buildExpandedContent() {
+    if (widget.content == null) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: EmptyState(
+          title: "No requisites available",
+          text: '',
+        ),
+      );
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFFF5F5F5),
@@ -68,28 +87,20 @@ class _RequisitesCardState extends State<RequisitesCard> {
         ),
       ),
       width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.only(
-            left: 16.0, right: 16.0, bottom: 16.0, top: 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: [
+            _buildRequisitesRow('Recipient', widget.content!.recipient),
+            _buildRequisitesRow('INN', widget.content!.inn),
+            _buildRequisitesRow('KPP', widget.content!.kpp),
+            _buildRequisitesRow('Account', widget.content!.account),
+            _buildRequisitesRow('BIC', widget.content!.bic),
             _buildRequisitesRow(
-                'Recipient', '${widget.content['Requisites']['recipient']}'),
-            _buildRequisitesRow(
-                'INN', '${widget.content['Requisites']['inn']}'),
-            _buildRequisitesRow(
-                'KPP', '${widget.content['Requisites']['kpp']}'),
-            _buildRequisitesRow(
-                'Account', '${widget.content['Requisites']['account']}'),
-            _buildRequisitesRow(
-                'BIC', '${widget.content['Requisites']['bic']}'),
-            _buildRequisitesRow('Correspondent account',
-                '${widget.content['Requisites']['correspondent_account']}'),
-            _buildRequisitesRow(
-                'OKPO', '${widget.content['Requisites']['okpo']}'),
-            _buildRequisitesRow(
-                'Bank name', '${widget.content['Requisites']['bank_name']}'),
+                'Correspondent Account', widget.content!.correspondentAccount),
+            _buildRequisitesRow('OKPO', widget.content!.okpo),
+            _buildRequisitesRow('Bank Name', widget.content!.bankName),
           ],
         ),
       ),
@@ -98,21 +109,20 @@ class _RequisitesCardState extends State<RequisitesCard> {
 
   Widget _buildRequisitesRow(String title, String value) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(bottom: 5),
-            child: Text(
-              title,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 12,
-                  color: Color(0xFFA5A5A7)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 12,
+              color: Color(0xFFA5A5A7),
             ),
           ),
+          const SizedBox(height: 5),
           Text(
             value,
             style: const TextStyle(color: Colors.black, fontSize: 16),

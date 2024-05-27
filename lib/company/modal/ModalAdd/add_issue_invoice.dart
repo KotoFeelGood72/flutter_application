@@ -1,10 +1,23 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
-import 'package:flutter_application/company/components/uk_dropdown.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/uk_text_field.dart';
 import 'package:flutter_application/service/dio_config.dart';
+
+class ApartmentService {
+  final int id;
+  final String name;
+
+  ApartmentService({required this.id, required this.name});
+
+  factory ApartmentService.fromJson(Map<String, dynamic> json) {
+    return ApartmentService(
+      id: json['id'] as int,
+      name: json['name'] as String,
+    );
+  }
+}
 
 class AddIssueInvoice extends StatefulWidget {
   final int id;
@@ -15,43 +28,18 @@ class AddIssueInvoice extends StatefulWidget {
 }
 
 class _AddIssueInvoiceState extends State<AddIssueInvoice> {
-  List<Map<String, dynamic>> apartmentsList = [];
-  final List<Map<String, dynamic>> servicesList = [
-    {'name': 'Cleaning', 'id': '1'},
-    {'name': 'Trash removal', 'id': '2'},
-    {'name': 'Gardener', 'id': '3'},
-    {'name': 'Pool', 'id': '4'},
-    {'name': 'Electrician', 'id': '5'},
-    {'name': 'Other', 'id': '6'},
-    {'name': 'Electricity', 'id': '7'},
-    {'name': 'Water', 'id': '8'},
-    {'name': 'Internet', 'id': '9'},
-    {'name': 'Rent', 'id': '10'},
-  ];
-  String selectedAppartamentId = '';
-  String? selectedServiceId;
-  String billNumber = '';
-  String amount = '';
-  String comment = '';
-
   final TextEditingController billNumberController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
   final TextEditingController commentController = TextEditingController();
+  Map<String, dynamic> appartament = {};
+  List<ApartmentService> combinedServiceList = [];
+
+  ApartmentService? selectedService;
 
   @override
   void initState() {
     super.initState();
-    _getAppartamentsList().then((_) {
-      if (apartmentsList.isNotEmpty) {
-        setState(() {
-          selectedAppartamentId = apartmentsList[0]['id'].toString();
-        });
-      }
-    });
-
-    if (servicesList.isNotEmpty) {
-      selectedServiceId = servicesList[0]['id'].toString();
-    }
+    _getInvoiceServiceList();
   }
 
   @override
@@ -62,52 +50,79 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
     super.dispose();
   }
 
-  void _onAppartamentSelected(String id) {
-    setState(() {
-      selectedAppartamentId = id;
-    });
+  void _showSuccessModal() {
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return const SuccessModal(
+            message: "Invoice has been successfully issued.");
+      },
+    );
   }
 
-  Future<void> _getAppartamentsList() async {
+  Future<void> _getInvoiceServiceList() async {
     try {
       final response = await DioSingleton()
           .dio
-          .get('get_objects_uk/${widget.id}/apartment_list');
-      if (response.data != null && response.data['apartments'] is List) {
-        final List appartaments = response.data['apartments'];
+          .get('employee/apartments/apartment_info/${widget.id}/invoice');
+      if (response.data != null && response.data.isNotEmpty) {
+        var rawData = response.data[0];
+
+        List<dynamic> serviceRawList =
+            response.data[1]['services_list'][1]['service_list'] as List;
+        List<dynamic> meterRawList =
+            response.data[1]['services_list'][0]['meter_service_list'] as List;
+
+        List<ApartmentService> services = serviceRawList
+            .map((json) =>
+                ApartmentService.fromJson(json as Map<String, dynamic>))
+            .toList();
+        List<ApartmentService> meters = meterRawList
+            .map((json) =>
+                ApartmentService.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        List<ApartmentService> combinedList = [];
+        combinedList.addAll(services);
+        combinedList.addAll(meters);
+
         setState(() {
-          apartmentsList = List<Map<String, dynamic>>.from(appartaments);
+          appartament = rawData;
+          combinedServiceList = combinedList;
+          selectedService = combinedList.isNotEmpty ? combinedList.first : null;
         });
       }
-      print(response);
     } catch (e) {
       print("Ошибка при получении данных: $e");
     }
   }
 
   Future<void> fetchInvoice() async {
+    if (selectedService == null) {
+      print("No service selected");
+      return;
+    }
+
     final data = {
-      "apartment_id": int.parse(selectedAppartamentId),
-      "service_name": servicesList
-          .firstWhere((service) => service['id'] == selectedServiceId)['name'],
-      "service_id": int.parse(selectedServiceId!),
+      "apartment_id": appartament['id'].toString(),
+      "service_name": selectedService!.name,
+      "service_id": selectedService!.id.toString(),
       "bill_number": billNumberController.text,
       "amount": amountController.text,
       "comment": commentController.text,
     };
 
     try {
-      final response = await DioSingleton().dio.post(
+      await DioSingleton().dio.post(
             'employee/apartments/apartment_info/${widget.id}/invoice',
             data: data,
           );
-      Navigator.pop(context);
-      await showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SuccessModal(message: "Invoice has been successfully issued.");
-        },
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        _showSuccessModal();
+      }
     } catch (e) {
       print("Ошибка при отправке данных: $e");
     }
@@ -115,20 +130,31 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Container(
-      padding: EdgeInsets.only(top: 18, left: 15, right: 15, bottom: 34),
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(top: 18, left: 15, right: 15, bottom: 34),
       child: ListView(
+        shrinkWrap: true,
         children: [
-          ModalHeader(title: 'Issue an invoice'),
-          UkDropdown(
-            itemsList: apartmentsList,
-            selectedItemKey: "1",
-            onSelected: (selectedId) {},
-            displayValueKey: "apartment_name",
-            valueKey: "id",
+          const ModalHeader(title: 'Issue an invoice'),
+          const SizedBox(height: 10),
+          Container(
+            height: 50,
+            margin: const EdgeInsets.only(bottom: 13),
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(14)),
+            child: Text(appartament['name'] ?? 'No appartament'),
           ),
-          IssueInvoiceList(servicesList: servicesList),
+          IssueInvoiceList(
+            servicesList: combinedServiceList,
+            selectedService: selectedService,
+            onSelected: (service) {
+              setState(() => selectedService = service);
+            },
+          ),
           const SizedBox(height: 10),
           UkTextField(
             hint: 'Bill number',
@@ -143,78 +169,49 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
             controller: commentController,
           ),
           const SizedBox(height: 10),
-          Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: const Color(0xFF6873D1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: TextButton(
-                  onPressed: fetchInvoice,
-                  child: const Text(
-                    'Issue an invoice',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-              ))
+          CustomBtn(
+            title: 'Issue an invoice',
+            onPressed: fetchInvoice,
+            height: 55,
+          )
         ],
       ),
-    ));
+    );
   }
 }
 
-class IssueInvoiceList extends StatefulWidget {
-  final List<Map<String, dynamic>> servicesList;
-  const IssueInvoiceList({Key? key, required this.servicesList})
-      : super(key: key);
+class IssueInvoiceList extends StatelessWidget {
+  final List<ApartmentService> servicesList;
+  final ApartmentService? selectedService;
+  final Function(ApartmentService) onSelected;
 
-  @override
-  _IssueInvoiceListState createState() => _IssueInvoiceListState();
-}
-
-class _IssueInvoiceListState extends State<IssueInvoiceList> {
-  String? selectedServiceId;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.servicesList.isNotEmpty) {
-      selectedServiceId = widget.servicesList.first['id'];
-    }
-  }
+  const IssueInvoiceList({
+    Key? key,
+    required this.servicesList,
+    this.selectedService,
+    required this.onSelected,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 8.0,
-      runSpacing: 4.0,
-      children: widget.servicesList.map((service) {
-        bool isSelected = service['id'] == selectedServiceId;
+      runSpacing: 9.0,
+      children: servicesList.map((service) {
+        bool isSelected = service == selectedService;
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedServiceId = service['id'];
-              print("Выбрана услуга с id: $selectedServiceId");
-            });
-          },
+          onTap: () => onSelected(service),
           child: Container(
             padding:
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF7961BE)
-                  : const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(10),
+              color: isSelected ? const Color(0xFF7961BE) : Colors.grey[200],
+              borderRadius: BorderRadius.circular(15),
             ),
             child: Text(
-              service['name'],
+              service.name,
               style: const TextStyle(
-                  color: Colors.black, fontWeight: FontWeight.w400),
+                  color: Colors.black, fontWeight: FontWeight.w500),
             ),
           ),
         );

@@ -5,43 +5,21 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/client/bloc/client_bloc.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
+import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 final _router = AppRouter();
+
 Future<void> _signOut() async {
   try {
     await FirebaseAuth.instance.signOut();
     _router.push(const AuthRoute());
   } catch (e) {
-    print("Ошибка при выходе: $e");
-  }
-}
-
-Future<void> _uploadImg() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.image,
-  );
-
-  if (result != null) {
-    File imageFile = File(result.files.single.path!);
-
-    FormData formData = FormData.fromMap({
-      "photo":
-          await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
-    });
-    print(formData.fields);
-    print(formData.files);
-
-    try {
-      final response =
-          await DioSingleton().dio.post('client/add_photo', data: formData);
-    } catch (e) {
-      print("Ошибка при загрузке изображения: $e");
-    }
-  } else {
-    // Пользователь отменил выбор файла
-    print("Выбор файла отменен");
+    // print("Ошибка при выходе: $e");
   }
 }
 
@@ -54,195 +32,133 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  Map<String?, dynamic> userProfile = {};
-  String? userImg;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _getUserInfo();
+    BlocProvider.of<ClientBloc>(context).add(ClientInfoUser());
   }
 
-  Future<void> _getUserInfo() async {
-    try {
-      final response = await DioSingleton().dio.get('client/profile');
-      setState(() {
-        userProfile = response.data;
+  Future<void> _uploadImg() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      File imageFile = File(result.files.single.path!);
+      String? originalFileName = result.files.single.name;
+
+      FormData formData = FormData.fromMap({
+        "photo": await MultipartFile.fromFile(imageFile.path,
+            filename: originalFileName),
       });
-      print('Image: ${userProfile}');
-    } catch (e) {
-      print("Ошибка при получении информации о профиле: $e");
+
+      try {
+        var response =
+            await DioSingleton().dio.post('client/add_photo', data: formData);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          BlocProvider.of<ClientBloc>(context).add(ClientInfoUser());
+        } else {
+          // Handle error
+        }
+      } catch (e) {
+        print("Ошибка при отправке данных: $e");
+      }
+    } else {
+      print("Выбор файла отменен");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(376.0),
-        child: Column(
-          children: [
-            Container(
-              color: const Color(0xFF18232D),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: AppBar(
-                  title: const Text('Profile',
-                      style: TextStyle(color: Colors.white)),
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF18232D),
-                  centerTitle: true,
-                  leading: Container(
-                    margin: const EdgeInsets.all(13),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: IconButton(
-                      icon: Image.asset(
-                        'assets/img/back.png',
-                        width: 22,
-                        height: 22,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
+      body: BlocBuilder<ClientBloc, ClientState>(
+        builder: (context, state) {
+          if (state is ClientState && state.userInfo == null) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ClientState && state.userInfo != null) {
+            var userProfile = state.userInfo;
+            String userName =
+                "${userProfile?.firstname ?? ''} ${userProfile?.lastname ?? ''}"
+                    .trim();
+            String? userImg = userProfile?.photoPath;
+
+            return ListView(
+              shrinkWrap: true,
+              children: [
+                UserProfileHeader(
+                  imageNetwork: userImg ?? '',
+                  imageAsset: 'assets/img/profile-big.png',
+                  userName: userName,
+                  onAddPhotoPressed: _uploadImg,
                 ),
-              ),
-            ),
-            Container(
-              color: const Color(0xFF18232D),
-              width: double.infinity,
-              child: Column(children: <Widget>[
+                const SizedBox(height: 20),
                 Container(
-                  width: 103,
-                  height: 103,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(103 / 2),
-                    color: Colors.transparent,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Color.fromRGBO(255, 255, 255, 0.2),
+                  padding: const EdgeInsets.only(
+                      top: 10, left: 15, right: 15, bottom: 20),
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: const EdgeInsets.only(bottom: 13),
+                        child: const Text(
+                          'Personal information',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF73797C)),
+                        ),
                       ),
-                      child: Image.asset('assets/img/profile-big.png'),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16, top: 20),
-                  child: Text(
-                    '${userProfile['firstname']} ${userProfile['lastname']}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(255, 255, 255, 0.32),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  onPressed: _uploadImg,
-                  child: const Padding(
-                    padding:
-                        EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
-                    child: Text(
-                      'Add photo',
-                      style: TextStyle(
-                        color: Colors.white,
+                      ListInfoItem(
+                          title:
+                              '${userProfile?.firstname ?? ''} ${userProfile?.lastname ?? ''}',
+                          icon: 'assets/img/mini-user.png'),
+                      ListInfoItem(
+                          title: '${userProfile?.phoneNumber ?? ''}',
+                          icon: 'assets/img/mini-phone.png'),
+                      ListInfoItem(
+                          title: '${userProfile?.email ?? ''}',
+                          icon: 'assets/img/mini-mail.png'),
+                      const SizedBox(height: 15),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: const EdgeInsets.only(bottom: 13),
+                        child: const Text(
+                          'Security and notifications',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF73797C)),
+                        ),
                       ),
-                    ),
+                      ListInfoItem(
+                          onTap: () {
+                            AutoRouter.of(context).push(NotificationsRoute());
+                          },
+                          title: 'Notifications',
+                          icon: 'assets/img/mini-notice.png'),
+                      ListInfoItem(
+                          title: 'About the application',
+                          onTap: () => AutoRouter.of(context)
+                              .push(const DevelopmentRoute()),
+                          icon: 'assets/img/mini-about.png'),
+                      const CustomBtn(
+                        title: 'Logout',
+                        onPressed: _signOut,
+                        height: 55,
+                        color: Color(0xFFBE6161),
+                      )
+                    ],
                   ),
-                ),
-                const SizedBox(height: 37)
-              ]),
-            ),
-          ],
-        ),
+                )
+              ],
+            );
+          } else {
+            return const Center(child: Text('Error loading profile'));
+          }
+        },
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Container(
-                alignment: Alignment.centerLeft,
-                margin: const EdgeInsets.only(bottom: 13),
-                child: const Text(
-                  'Personal information',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: Color(0xFF73797C)),
-                ),
-              ),
-              ListInfoItem(
-                  title:
-                      '${userProfile['firstname']} ${userProfile['lastname']}',
-                  icon: 'assets/img/mini-user.png'),
-              ListInfoItem(
-                  title: '${userProfile['phone_number']}',
-                  icon: 'assets/img/mini-phone.png'),
-              ListInfoItem(
-                  title: '${userProfile['email']}',
-                  icon: 'assets/img/mini-mail.png'),
-              const SizedBox(height: 37),
-              Container(
-                alignment: Alignment.centerLeft,
-                margin: const EdgeInsets.only(bottom: 13),
-                child: const Text(
-                  'Security and notifications',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: Color(0xFF73797C)),
-                ),
-              ),
-              const ListInfoItem(
-                  title: 'Login settings', icon: 'assets/img/mini-login.png'),
-              const ListInfoItem(
-                  title: 'Notifications', icon: 'assets/img/mini-notice.png'),
-              const ListInfoItem(
-                  title: 'About the application',
-                  icon: 'assets/img/mini-about.png'),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _signOut,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color(0xFF878E92)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(14.0),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // ],
-        ),
-      ),
-      // ),
     );
   }
 }
@@ -250,21 +166,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 class ListInfoItem extends StatelessWidget {
   final String title;
   final String icon;
+  final VoidCallback? onTap;
 
-  const ListInfoItem({super.key, required this.title, required this.icon});
+  const ListInfoItem(
+      {super.key, required this.title, required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 13),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFFF5F5F5)),
-      child: ListTile(
-        leading: Image.asset(icon),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 14),
+    return InkWell(
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 13),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: const Color(0xFFF5F5F5)),
+        child: ListTile(
+          leading: Image.asset(icon),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 14),
+          ),
         ),
       ),
     );

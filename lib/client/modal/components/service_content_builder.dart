@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/client/modal/components/serviceItem.dart'; // Убедитесь, что путь правильный
+import 'package:flutter_application/client/modal/components/service_item.dart'; // Убедитесь, что путь правильный
 
 // Предполагая, что ServiceItem и servicesList уже определены в вашем коде
 void onServiceItemSelected(
@@ -22,7 +22,7 @@ Widget buildServiceContent(String? service, List<ServiceItem> servicesList,
           return ServiceItem(
             serviceName: item.serviceName,
             price: item.price,
-            isCountable: item.isCountable ?? false,
+            isCountable: item.isCountable,
             onSelected: (bool isSelected, String serviceName, double price,
                 int quantity) {
               updateActiveServices(isSelected, serviceName, price, quantity);
@@ -40,12 +40,12 @@ Widget buildServiceContent(String? service, List<ServiceItem> servicesList,
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: TextFormField(
               maxLines: 6,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14.0,
               ),
               decoration: InputDecoration(
                 hintText: "Describe the required service",
-                fillColor: Color(0xFFF5F5F5),
+                fillColor: const Color(0xFFF5F5F5),
                 filled: true,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
@@ -58,9 +58,10 @@ Widget buildServiceContent(String? service, List<ServiceItem> servicesList,
             padding: const EdgeInsets.only(left: 10, top: 17),
             child: Container(
               alignment: Alignment.centerLeft,
-              child: Text(
+              child: const Text(
                 'no more than 500 characters',
-                style: TextStyle(fontSize: 12, color: Color(0xFF73797C80)),
+                // ignore: use_full_hex_values_for_flutter_colors
+                style: TextStyle(fontSize: 12, color: Color(0xff73797c80)),
               ),
             ),
           )
@@ -68,7 +69,7 @@ Widget buildServiceContent(String? service, List<ServiceItem> servicesList,
       );
     default:
       // Если услуга не выбрана, отображаем пустой контейнер или информационное сообщение
-      return Center(
+      return const Center(
         child: Text('Please select a service to see more options'),
       );
   }
