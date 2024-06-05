@@ -49,9 +49,15 @@ class _UsersChatScreenState extends State<UsersChatScreen> {
         var lastMessage = lastMessageDoc != null
             ? lastMessageDoc['timestamp'] as Timestamp
             : null;
-        var lastMessageText = lastMessageDoc != null
-            ? lastMessageDoc['text'] ?? 'Image message...'
-            : 'No messages yet';
+        var lastMessageText = 'No messages yet';
+
+        if (lastMessageDoc != null) {
+          if (lastMessageDoc['imageUrl'] != null) {
+            lastMessageText = 'send is image';
+          } else {
+            lastMessageText = lastMessageDoc['text'] ?? 'Image message...';
+          }
+        }
 
         if (lastMessageText.length > 30) {
           lastMessageText = '${lastMessageText.substring(0, 30)}...';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/client/modal/client_modal_order.dart';
 import 'package:flutter_application/client/modal/modal_order.dart';
+import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Order {
@@ -53,8 +54,7 @@ class _InqServicesState extends State<InqServices> {
   void initState() {
     super.initState();
     _clientBloc = context.read<ClientBloc>();
-    _clientBloc
-        .add(ClientInfoUser()); // Ensure this event is added to get user info.
+    _clientBloc.add(ClientInfoUser());
   }
 
   @override
@@ -106,7 +106,8 @@ class _InqServicesState extends State<InqServices> {
               },
             );
           } else {
-            return const Center(child: Text('No data available'));
+            return const Center(
+                child: EmptyState(title: 'Not services aviable', text: ''));
           }
         },
       ),

@@ -9,6 +9,8 @@ abstract class EmployeeState extends Equatable {
 
 class EmployeeInitial extends EmployeeState {}
 
+class EmployeeLoading extends EmployeeState {}
+
 class EmployeeDataLoaded extends EmployeeState {
   final EmployeeInfo employeeInfo;
 
@@ -16,4 +18,13 @@ class EmployeeDataLoaded extends EmployeeState {
 
   @override
   List<Object?> get props => [employeeInfo];
+}
+
+class EmployeeError extends EmployeeState {
+  final String message;
+
+  const EmployeeError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
 }

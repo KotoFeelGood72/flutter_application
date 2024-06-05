@@ -26,13 +26,13 @@ class ClientUser {
         .map((e) => ApartmentInfo.fromJson(e as Map<String, dynamic>))
         .toList();
     return ClientUser(
-      firstname: json['first_name'],
-      lastname: json['last_name'],
-      phoneNumber: json['phone_number'],
-      email: json['email'],
-      role: json['role'],
+      firstname: json['first_name'] ?? '',
+      lastname: json['last_name'] ?? '',
+      phoneNumber: json['phone_number'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? '',
       apartmentInfo: apartments,
-      photoPath: json['photo_path'],
+      photoPath: json['photo_path'] ?? '',
       balance: json['balance'].toDouble(),
     );
   }

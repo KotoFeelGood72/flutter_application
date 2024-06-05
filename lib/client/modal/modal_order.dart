@@ -1,11 +1,9 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/client/modal/components/select_objects.dart';
 import 'package:flutter_application/client/modal/components/service_item.dart';
-// import 'package:flutter_application/client/modal/components/service_content_builder.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/company/modal/ModalInfo/payment/info_paid_modal.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
@@ -212,11 +210,9 @@ class _ModalOrderState extends State<ModalOrder> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               const ModalHeader(title: 'Service'),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {
                   showModalBottomSheet(
@@ -235,7 +231,7 @@ class _ModalOrderState extends State<ModalOrder> {
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 1),
                   margin: const EdgeInsets.only(bottom: 25),
                   child: SizedBox(
-                    height: 66,
+                    height: 56,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -362,7 +358,7 @@ class _ModalOrderState extends State<ModalOrder> {
                     ],
                   )),
               Container(
-                margin: const EdgeInsets.only(bottom: 20),
+                margin: const EdgeInsets.only(bottom: 10),
                 child: Column(
                   children: filteredServices.map<Widget>((service) {
                     return ServiceItem(
@@ -379,7 +375,7 @@ class _ModalOrderState extends State<ModalOrder> {
               ),
               Container(
                 alignment: Alignment.centerLeft,
-                margin: const EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.only(bottom: 5),
                 child: TextButton.icon(
                   icon: Transform.rotate(
                     angle: math.pi / 5,

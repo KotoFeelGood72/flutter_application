@@ -20,8 +20,9 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   List<NotificationModel> notifications = [];
+  String? userRole;
 
-  Future<String?> getUserRole() async {
+  Future<String?> fetchUserRole() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance
@@ -36,10 +37,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void _navigateBack(BuildContext context) async {
-    String? userRole = await getUserRole();
+    String? role = await fetchUserRole();
 
-    if (userRole != null) {
-      switch (userRole) {
+    if (role != null) {
+      switch (role) {
         case 'client':
           AutoRouter.of(context).push(HomeRoute());
           break;
@@ -59,7 +60,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Future<void> _getNotifications() async {
     try {
-      String? userRole = await getUserRole();
       var response;
       switch (userRole) {
         case 'client':
@@ -88,9 +88,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     String apartmentId,
     String id,
   ) async {
-    String? userRole = await getUserRole();
-    if (userRole != null) {
-      switch (userRole) {
+    String? role = await fetchUserRole();
+    if (role != null) {
+      switch (role) {
         case 'Company':
         case 'Employee':
           if (type == 'order') {
@@ -103,7 +103,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     id: int.parse(id), appartmentId: int.parse(apartmentId));
               },
             );
-          } else if (type == 'news' && userRole == 'Employee') {
+          } else if (type == 'news' && role == 'Employee') {
             AutoRouter.of(context).push(NewsRoute(id: int.parse(id), type: ''));
           }
           break;
@@ -135,7 +135,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _getNotifications();
+    fetchUserRole().then((role) {
+      setState(() {
+        userRole = role;
+      });
+      if (userRole != null) {
+        _getNotifications();
+      }
+    });
   }
 
   @override
@@ -269,7 +276,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   );
                 },
               ),
-        bottomNavigationBar: const BottomAdminBar(),
+        bottomNavigationBar: userRole == null || userRole == 'client'
+            ? null
+            : const BottomAdminBar(),
       ),
     );
   }

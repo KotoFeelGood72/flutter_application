@@ -39,7 +39,6 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
   @override
   void initState() {
     super.initState();
-    // Запрос данных через Bloc при инициализации
     context.read<EmployeeBloc>().add(EmployeeLoaded());
   }
 
@@ -48,7 +47,7 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
     return Scaffold(
       body: BlocBuilder<EmployeeBloc, EmployeeState>(
         builder: (context, state) {
-          if (state is EmployeeInitial) {
+          if (state is EmployeeLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is EmployeeDataLoaded) {
             final userProfile = state.employeeInfo;
@@ -73,7 +72,7 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
                                     alignment: Alignment.centerLeft,
                                     width: 250,
                                     child: Text(
-                                      '${userProfile?.firstname ?? 'Имя'} ${userProfile?.lastname ?? 'Фамилия'}',
+                                      '${userProfile.firstname} ${userProfile.lastname}',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,
@@ -84,8 +83,7 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
                                     alignment: Alignment.centerLeft,
                                     width: 250,
                                     child: Text(
-                                      userProfile?.objectName ??
-                                          'Неизвестный объект',
+                                      userProfile.objectName,
                                       style:
                                           TextStyle(color: Color(0xFFA5A5A7)),
                                     ),
@@ -178,11 +176,47 @@ class _EmployeHomeMainScreenState extends State<EmployeHomeMainScreen> {
               ],
             );
           } else {
-            return const Center(child: Text('Неизвестное состояние'));
+            return const Center(child: Text('No data'));
           }
         },
       ),
       bottomNavigationBar: const BottomAdminBar(),
+    );
+  }
+}
+
+class ListInfoItem extends StatelessWidget {
+  final String title;
+  final String icon;
+  final VoidCallback? onTap;
+
+  const ListInfoItem({
+    super.key,
+    required this.title,
+    required this.icon,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 13),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: const Color(0xFFF5F5F5),
+        ),
+        child: ListTile(
+          leading: Image.asset(icon),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ),
     );
   }
 }

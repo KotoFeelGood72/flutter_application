@@ -13,7 +13,6 @@ class BottomAdminBar extends StatefulWidget {
 }
 
 class _BottomAdminBarState extends State<BottomAdminBar> {
-  int _selectedIndex = 0;
   late final StackRouter _router;
   String _userRole = '';
   bool hasUnreadNotifications = false;
@@ -34,12 +33,6 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _updateSelectedIndex();
-  }
-
-  @override
   void dispose() {
     _router.removeListener(_onRouteChanged);
     _notificationSubscription?.cancel();
@@ -49,32 +42,7 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
   }
 
   void _onRouteChanged() {
-    _updateSelectedIndex();
-  }
-
-  void _updateSelectedIndex() {
-    final currentRoute = _router.current.name;
-    int newIndex;
-    switch (currentRoute) {
-      case NotificationsRoute.name:
-        newIndex = 0;
-        break;
-      case CompanyHomeMainRoute.name:
-      case EmployeHomeMainRoute.name:
-        newIndex = 1;
-        break;
-      case UsersChatRoute.name:
-        newIndex = 2;
-        break;
-      default:
-        newIndex = 0;
-    }
-
-    if (newIndex != _selectedIndex) {
-      setState(() {
-        _selectedIndex = newIndex;
-      });
-    }
+    setState(() {});
   }
 
   Future<void> _fetchUserRole() async {
@@ -93,22 +61,24 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
   }
 
   void _onItemTapped(int index) {
-    if (index != _selectedIndex) {
-      switch (index) {
-        case 0:
-          _router.push(const NotificationsRoute());
-          break;
-        case 1:
-          if (_userRole == 'Company') {
-            _router.push(const CompanyHomeMainRoute());
-          } else {
-            _router.push(const EmployeHomeMainRoute());
-          }
-          break;
-        case 2:
-          _router.push(const UsersChatRoute());
-          break;
-      }
+    switch (index) {
+      case 0:
+        _router.pushAndPopUntil(const NotificationsRoute(),
+            predicate: (_) => false);
+        break;
+      case 1:
+        if (_userRole == 'Company') {
+          _router.pushAndPopUntil(const CompanyHomeMainRoute(),
+              predicate: (_) => false);
+        } else {
+          _router.pushAndPopUntil(const EmployeHomeMainRoute(),
+              predicate: (_) => false);
+        }
+        break;
+      case 2:
+        _router.pushAndPopUntil(const UsersChatRoute(),
+            predicate: (_) => false);
+        break;
     }
   }
 
@@ -188,6 +158,10 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
     });
   }
 
+  bool _isRouteActive(String routeName) {
+    return _router.current.name == routeName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -209,17 +183,21 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
             icon: 'assets/img/note-menu.png',
             label: 'Notifications',
             hasNotificationDot: hasUnreadNotifications,
+            isActive: _isRouteActive(NotificationsRoute.name),
           ),
           _buildNavItem(
             index: 1,
             icon: 'assets/img/home-menu.png',
             label: 'Main',
+            isActive: _isRouteActive(CompanyHomeMainRoute.name) ||
+                _isRouteActive(EmployeHomeMainRoute.name),
           ),
           _buildNavItem(
             index: 2,
             icon: 'assets/img/chat-menu.png',
             label: 'Chats',
             hasNotificationDot: hasUnreadChats,
+            isActive: _isRouteActive(UsersChatRoute.name),
           ),
         ],
       ),
@@ -231,6 +209,7 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
     required String icon,
     required String label,
     bool hasNotificationDot = false,
+    bool isActive = false,
   }) {
     return Expanded(
       child: InkWell(
@@ -270,7 +249,7 @@ class _BottomAdminBarState extends State<BottomAdminBar> {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: _selectedIndex == index
+                  color: isActive
                       ? const Color(0xFF6873D1)
                       : const Color(0xFF878E92),
                 ),

@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/employee/pages/home/employee_home.dart';
+import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
@@ -62,7 +64,6 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
           print("The image has been uploaded successfully");
           if (mounted) {
             setState(() {
-              // Update the state after uploading the image
               context.read<CompanyBloc>().add(CompanyLoaded());
             });
           }
@@ -103,31 +104,41 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   final userImg = company!.photoPath;
                   final contacts = company.contacts ?? [];
 
-                  List<Widget> contactWidgets = contacts.map<Widget>((contact) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 13),
-                            child: Text(contact.name ?? 'No name',
-                                style: const TextStyle(
-                                    color: Color(0xFF73797C),
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        if (contact.phone != null)
-                          ListInfoItem(
-                              title: contact.phone.toString(),
-                              icon: 'assets/img/mini-phone.png'),
-                        if (contact.email != null)
-                          ListInfoItem(
-                              title: contact.email,
-                              icon: 'assets/img/mini-mail.png'),
-                      ],
-                    );
-                  }).toList();
+                  List<Widget> contactWidgets = contacts.isEmpty
+                      ? [
+                          Container(
+                            margin: EdgeInsets.only(bottom: 20),
+                            child: EmptyState(
+                              title: 'Not information',
+                              text: 'contacts list is empty',
+                            ),
+                          )
+                        ]
+                      : contacts.map<Widget>((contact) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20),
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 13),
+                                  child: Text(contact.name ?? 'No name',
+                                      style: const TextStyle(
+                                          color: Color(0xFF73797C),
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                              if (contact.phone != null)
+                                ListInfoItem(
+                                    title: contact.phone.toString(),
+                                    icon: 'assets/img/mini-phone.png'),
+                              if (contact.email != null)
+                                ListInfoItem(
+                                    title: contact.email ?? '',
+                                    icon: 'assets/img/mini-mail.png'),
+                            ],
+                          );
+                        }).toList();
 
                   return ListView(
                     shrinkWrap: true,
@@ -135,7 +146,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                       UserProfileHeader(
                         imageNetwork: userImg ?? '',
                         imageAsset: 'assets/img/profile-big.png',
-                        userName: company.ukName,
+                        userName: company.ukName ?? '',
                         onAddPhotoPressed: _uploadImg,
                       ),
                       Padding(
@@ -160,7 +171,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   return const Center(child: CircularProgressIndicator());
                 } else {
                   return const Center(
-                      child: Text('Failed to load company data'));
+                      child: Text('Не удалось загрузить данные компании'));
                 }
               },
             ),
@@ -174,30 +185,6 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
           ],
         ),
         bottomNavigationBar: BottomAdminBar(),
-      ),
-    );
-  }
-}
-
-class ListInfoItem extends StatelessWidget {
-  final String title;
-  final String icon;
-
-  const ListInfoItem({super.key, required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 13),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFFF5F5F5)),
-      child: ListTile(
-        leading: Image.asset(icon),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 14),
-        ),
       ),
     );
   }

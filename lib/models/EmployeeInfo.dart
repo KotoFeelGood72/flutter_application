@@ -5,9 +5,11 @@ class EmployeeInfo {
     required this.phoneNumber,
     required this.photoPath,
     required this.objectName,
+    required this.email,
   });
 
   final String firstname;
+  final String email;
   final String lastname;
   final String phoneNumber;
   final String photoPath;
@@ -15,11 +17,12 @@ class EmployeeInfo {
 
   factory EmployeeInfo.fromJson(Map<String, dynamic> json) {
     return EmployeeInfo(
-      firstname: json['first_name'],
-      lastname: json['last_name'],
-      phoneNumber: json['phone_number'],
-      photoPath: json['photo_path'],
-      objectName: json['object_name'],
+      firstname: json['first_name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      lastname: json['last_name'] as String? ?? '',
+      phoneNumber: json['phone_number'] as String? ?? '',
+      photoPath: json['photo_path'] as String? ?? '',
+      objectName: json['object_name'] as String? ?? '',
     );
   }
 
@@ -30,6 +33,7 @@ class EmployeeInfo {
       'phone_number': phoneNumber,
       'photo_path': photoPath,
       'object_name': objectName,
+      'email': email,
     };
   }
 }

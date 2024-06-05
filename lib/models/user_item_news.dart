@@ -1,5 +1,5 @@
 class UserItemNews {
-  final int id;
+  final String id;
   final String name;
 
   UserItemNews({required this.id, required this.name});

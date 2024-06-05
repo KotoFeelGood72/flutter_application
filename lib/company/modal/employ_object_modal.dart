@@ -6,6 +6,7 @@ import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/default_list_card.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_application/widget/empty_state.dart';
 
 class EmployObjectModal extends StatefulWidget {
   const EmployObjectModal({super.key});
@@ -38,27 +39,33 @@ class _EmployObjectModalState extends State<EmployObjectModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
-      child: Column(
-        children: [
-          const ModalHeader(title: 'Objects'),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView(
-              shrinkWrap: true,
-              children: objectList.map((object) {
-                return DefaultListCard(
-                  id: object['id'],
-                  name: object['object_name'] ?? 'No Name',
-                  address: object['object_address'] ?? 'No Address',
-                  imageUrl: 'assets/img/house.png',
-                  route: ObjectSingleRoute(id: object['id']),
-                );
-              }).toList(),
-            ),
-          ),
-          CustomBtn(
+    return SingleChildScrollView(
+      child: Container(
+        padding:
+            const EdgeInsets.only(top: 20, left: 15, right: 15, bottom: 24),
+        child: Column(
+          children: [
+            const ModalHeader(title: 'Objects'),
+            const SizedBox(height: 10),
+            objectList.isEmpty
+                ? const EmptyState(title: 'Objects list is empty', text: '')
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: objectList.length,
+                    itemBuilder: (context, index) {
+                      final object = objectList[index];
+                      return DefaultListCard(
+                        id: object['id'],
+                        name: object['object_name'] ?? 'No Name',
+                        address: object['object_address'] ?? 'No Address',
+                        imageUrl: 'assets/img/house.png',
+                        route: ObjectSingleRoute(id: object['id']),
+                      );
+                    },
+                  ),
+            const SizedBox(height: 20),
+            CustomBtn(
               title: 'Add an object',
               onPressed: () {
                 Navigator.pop(context);
@@ -72,8 +79,10 @@ class _EmployObjectModalState extends State<EmployObjectModal> {
                     return const AddObjectModal();
                   },
                 );
-              })
-        ],
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

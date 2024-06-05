@@ -41,12 +41,6 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const AuthScreen(),
       );
     },
-    ClientNoteRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const ClientNoteScreen(),
-      );
-    },
     CompanyAppartamentsRoute.name: (routeData) {
       final pathParams = routeData.inheritedPathParams;
       final args = routeData.argsAs<CompanyAppartamentsRouteArgs>(
@@ -94,6 +88,19 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const EmployeHomeMainScreen(),
+      );
+    },
+    EnterResetCodeRoute.name: (routeData) {
+      final pathParams = routeData.inheritedPathParams;
+      final args = routeData.argsAs<EnterResetCodeRouteArgs>(
+          orElse: () =>
+              EnterResetCodeRouteArgs(email: pathParams.getString('email')));
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: EnterResetCodeScreen(
+          key: args.key,
+          email: args.email,
+        ),
       );
     },
     ExecutorsProfileRoute.name: (routeData) {
@@ -163,6 +170,18 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const ProfileScreen(),
+      );
+    },
+    SendResetEmailRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SendResetEmailScreen(),
+      );
+    },
+    SplashRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: SplashScreen(),
       );
     },
     StaffProfileRoute.name: (routeData) {
@@ -283,20 +302,6 @@ class AuthRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'AuthRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [ClientNoteScreen]
-class ClientNoteRoute extends PageRouteInfo<void> {
-  const ClientNoteRoute({List<PageRouteInfo>? children})
-      : super(
-          ClientNoteRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'ClientNoteRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -423,6 +428,45 @@ class EmployeHomeMainRoute extends PageRouteInfo<void> {
   static const String name = 'EmployeHomeMainRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [EnterResetCodeScreen]
+class EnterResetCodeRoute extends PageRouteInfo<EnterResetCodeRouteArgs> {
+  EnterResetCodeRoute({
+    Key? key,
+    required String email,
+    List<PageRouteInfo>? children,
+  }) : super(
+          EnterResetCodeRoute.name,
+          args: EnterResetCodeRouteArgs(
+            key: key,
+            email: email,
+          ),
+          rawPathParams: {'email': email},
+          initialChildren: children,
+        );
+
+  static const String name = 'EnterResetCodeRoute';
+
+  static const PageInfo<EnterResetCodeRouteArgs> page =
+      PageInfo<EnterResetCodeRouteArgs>(name);
+}
+
+class EnterResetCodeRouteArgs {
+  const EnterResetCodeRouteArgs({
+    this.key,
+    required this.email,
+  });
+
+  final Key? key;
+
+  final String email;
+
+  @override
+  String toString() {
+    return 'EnterResetCodeRouteArgs{key: $key, email: $email}';
+  }
 }
 
 /// generated route for
@@ -624,6 +668,34 @@ class ProfileRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'ProfileRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SendResetEmailScreen]
+class SendResetEmailRoute extends PageRouteInfo<void> {
+  const SendResetEmailRoute({List<PageRouteInfo>? children})
+      : super(
+          SendResetEmailRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SendResetEmailRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SplashScreen]
+class SplashRoute extends PageRouteInfo<void> {
+  const SplashRoute({List<PageRouteInfo>? children})
+      : super(
+          SplashRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SplashRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

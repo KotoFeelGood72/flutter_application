@@ -73,20 +73,21 @@ class _CompanyHomeMainScreenState extends State<CompanyHomeMainScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              InkWell(
-                                hoverColor: Colors.transparent,
-                                onTap: () {},
-                                child: SizedBox(
-                                  width: 200,
-                                  child: Text(
-                                    '${company!.ukName ?? ''}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w600),
+                              if (company != null)
+                                InkWell(
+                                  hoverColor: Colors.transparent,
+                                  onTap: () {},
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      '${company!.ukName ?? ''}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                 ),
-                              ),
                               ProfileAvatar(
                                 photoUrl: company!.photoPath,
                                 route: CompanyProfileRoute(),
@@ -152,6 +153,7 @@ class _CompanyHomeMainScreenState extends State<CompanyHomeMainScreen> {
                                 onPressed: () {
                                   showModalBottomSheet(
                                     context: context,
+                                    isScrollControlled: true,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(0),
                                     ),

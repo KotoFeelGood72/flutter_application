@@ -41,7 +41,7 @@ class ClientBloc extends Bloc<ClientEvent, ClientState> {
               activeApartment: newActiveApartment));
         }
       } catch (e) {
-        // print('Ошибка при получении информации о пользователе: $e');
+        print('Ошибка при получении информации $e');
       }
     });
 

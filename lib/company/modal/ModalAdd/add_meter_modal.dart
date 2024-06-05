@@ -1,32 +1,16 @@
-// import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
-// import 'package:flutter_application/company/components/uk_dropdown.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/uk_text_field.dart';
 import 'package:flutter_application/models/Appartments.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
-// class Appartaments {
-//   final int id;
-//   final String name;
-
-//   Appartaments({required this.id, required this.name});
-
-//   factory Appartaments.fromJson(Map<String, dynamic> json) {
-//     return Appartaments(
-//         id: json['id'] as int, name: json['apartment_name'] as String);
-//   }
-// }
-
 class AddMeterModal extends StatefulWidget {
   final int id;
   const AddMeterModal({Key? key, required this.id}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _AddMeterModalState createState() => _AddMeterModalState();
 }
 
@@ -92,7 +76,6 @@ class _AddMeterModalState extends State<AddMeterModal> {
         },
       );
     } catch (e) {
-      // ignore: avoid_print
       print("Ошибка при отправке данных: $e");
     }
   }
@@ -107,59 +90,68 @@ class _AddMeterModalState extends State<AddMeterModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Container(
-      padding: const EdgeInsets.only(top: 18, left: 15, right: 15, bottom: 34),
-      child: ListView(
-        children: [
-          const ModalHeader(title: 'Enter meter readings'),
-          const SizedBox(height: 10),
-          if (appartament != null)
-            Container(
-              height: 50,
-              margin: const EdgeInsets.only(bottom: 13),
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(14)),
-              child: Text(appartament!.name),
-            ),
-          IssueInvoiceList(
-            meterList: meterList,
-            onUpdateSelectedMeterId: _handleMeterIdChange,
+    return Container(
+      color: Colors.white,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 18,
+          left: 15,
+          right: 15,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 34,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const ModalHeader(title: 'Enter meter readings'),
+              const SizedBox(height: 10),
+              if (appartament != null)
+                Container(
+                  height: 50,
+                  margin: const EdgeInsets.only(bottom: 13),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(14)),
+                  child: Text(appartament!.name),
+                ),
+              IssueInvoiceList(
+                meterList: meterList,
+                onUpdateSelectedMeterId: _handleMeterIdChange,
+              ),
+              const SizedBox(height: 7),
+              UkTextField(
+                hint: 'Bill number',
+                controller: billNumber,
+              ),
+              const SizedBox(height: 7),
+              UkTextField(
+                hint: 'Month, year',
+                isDateField: true,
+                controller: monthYear,
+              ),
+              const SizedBox(height: 7),
+              UkTextField(
+                hint: 'Meter readings',
+                controller: meterReadings,
+              ),
+              const SizedBox(height: 7),
+              UkTextField(
+                hint: 'Comment',
+                maxLines: 3,
+                controller: comment,
+              ),
+              const SizedBox(height: 10),
+              CustomBtn(
+                title: 'Enter meter readings',
+                onPressed: fetchMeter,
+                height: 55,
+              )
+            ],
           ),
-          const SizedBox(height: 7),
-          UkTextField(
-            hint: 'Bill number',
-            controller: billNumber,
-          ),
-          const SizedBox(height: 7),
-          UkTextField(
-            hint: 'Month, year',
-            isDateField: true,
-            controller: monthYear,
-          ),
-          const SizedBox(height: 7),
-          UkTextField(
-            hint: 'Meter readings',
-            controller: meterReadings,
-          ),
-          const SizedBox(height: 7),
-          UkTextField(
-            hint: 'Comment',
-            maxLines: 3,
-            controller: comment,
-          ),
-          const SizedBox(height: 10),
-          CustomBtn(
-            title: 'Enter meter readings',
-            onPressed: fetchMeter,
-            height: 55,
-          )
-        ],
+        ),
       ),
-    ));
+    );
   }
 }
 
@@ -173,7 +165,6 @@ class IssueInvoiceList extends StatefulWidget {
       : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _IssueInvoiceListState createState() => _IssueInvoiceListState();
 }
 

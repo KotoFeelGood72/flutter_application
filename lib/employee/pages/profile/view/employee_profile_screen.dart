@@ -9,15 +9,14 @@ import 'package:flutter_application/components/bottom_admin_bar.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/employee/bloc/employee_bloc.dart';
+import 'package:flutter_application/employee/pages/home/employee_home.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// import 'employee_bloc.dart'; // Импортируйте ваш EmployeeBloc
-
 final _router = AppRouter();
 
-Future<void> _signOut() async {
+Future<void> _signOut(BuildContext context) async {
   try {
     await FirebaseAuth.instance.signOut();
     _router.push(const AuthRoute());
@@ -66,7 +65,7 @@ class _EmployProfileScreenState extends State<EmployProfileScreen> {
     return Scaffold(
       body: BlocBuilder<EmployeeBloc, EmployeeState>(
         builder: (context, state) {
-          if (state is EmployeeInitial) {
+          if (state is EmployeeLoading || state is EmployeeInitial) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -134,15 +133,19 @@ class _EmployProfileScreenState extends State<EmployProfileScreen> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: CustomBtn(
                     title: 'Logout',
-                    onPressed: _signOut,
-                    color: Color(0xFFBE6161),
+                    onPressed: () => _signOut(context),
+                    color: const Color(0xFFBE6161),
                   ),
                 ),
                 const SizedBox(height: 20),
               ],
+            );
+          } else if (state is EmployeeError) {
+            return Center(
+              child: Text(state.message),
             );
           } else {
             return const Center(
@@ -151,32 +154,7 @@ class _EmployProfileScreenState extends State<EmployProfileScreen> {
           }
         },
       ),
-      bottomNavigationBar: BottomAdminBar(),
-    );
-  }
-}
-
-class ListInfoItem extends StatelessWidget {
-  final String title;
-  final String icon;
-
-  const ListInfoItem({super.key, required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 13),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: const Color(0xFFF5F5F5),
-      ),
-      child: ListTile(
-        leading: Image.asset(icon),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
+      bottomNavigationBar: const BottomAdminBar(),
     );
   }
 }

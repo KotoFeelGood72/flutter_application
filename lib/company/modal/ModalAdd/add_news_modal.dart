@@ -61,7 +61,7 @@ class _AddNewsModalState extends State<AddNewsModal> {
           .toList();
 
       if (!fetchedList.any((item) => item.name == 'All users')) {
-        fetchedList.insert(0, UserItemNews(id: -1, name: 'All users'));
+        fetchedList.insert(0, UserItemNews(id: 'all', name: 'All users'));
       }
 
       setState(() {
@@ -102,7 +102,7 @@ class _AddNewsModalState extends State<AddNewsModal> {
     FormData formData = FormData.fromMap({
       "name": _titleController.text,
       "description": _textarea.text,
-      "apartment_id": selectedUserItem!.id,
+      "apartment": selectedUserItem!.id,
       if (_mediaList.isNotEmpty)
         "photo": await MultipartFile.fromFile(
           _mediaList[0].path,

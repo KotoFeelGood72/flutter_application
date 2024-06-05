@@ -90,7 +90,7 @@ class _LoginTabState extends State<LoginTab> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Ошибка при перенаправлении на основе роли')));
+          content: Text('Error when redirecting based on the role')));
     }
   }
 
@@ -196,6 +196,22 @@ class _LoginTabState extends State<LoginTab> {
                                 borderRadius: 5,
                                 onPressed: _login,
                               ),
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          padding: EdgeInsets.only(top: 20),
+                          child: InkWell(
+                              onTap: () {
+                                AutoRouter.of(context)
+                                    .push(SendResetEmailRoute());
+                              },
+                              child: Text(
+                                'Forgot password',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF6873D1),
+                                    fontWeight: FontWeight.w400),
+                              )),
+                        )
                       ],
                     ),
                   ),

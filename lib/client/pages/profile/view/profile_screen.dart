@@ -6,8 +6,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
+import 'package:flutter_application/company/pages/staff/staff_profile.dart';
+import 'package:flutter_application/components/modal/user_settings.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
+import 'package:flutter_application/employee/pages/home/employee_home.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,9 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             await DioSingleton().dio.post('client/add_photo', data: formData);
         if (response.statusCode == 200 || response.statusCode == 201) {
           BlocProvider.of<ClientBloc>(context).add(ClientInfoUser());
-        } else {
-          // Handle error
-        }
+        } else {}
       } catch (e) {
         print("Ошибка при отправке данных: $e");
       }
@@ -116,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               '${userProfile?.firstname ?? ''} ${userProfile?.lastname ?? ''}',
                           icon: 'assets/img/mini-user.png'),
                       ListInfoItem(
-                          title: '${userProfile?.phoneNumber ?? ''}',
+                          title: userProfile?.phoneNumber ?? '',
                           icon: 'assets/img/mini-phone.png'),
                       ListInfoItem(
                           title: '${userProfile?.email ?? ''}',
@@ -143,6 +144,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onTap: () => AutoRouter.of(context)
                               .push(const DevelopmentRoute()),
                           icon: 'assets/img/mini-about.png'),
+                      ListInfoItem(
+                        title: 'Edit profile',
+                        icon: 'assets/img/mini-user.png',
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(0),
+                            ),
+                            builder: (BuildContext context) {
+                              return UserSettings();
+                            },
+                          );
+                        },
+                      ),
                       const CustomBtn(
                         title: 'Logout',
                         onPressed: _signOut,
@@ -158,37 +175,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return const Center(child: Text('Error loading profile'));
           }
         },
-      ),
-    );
-  }
-}
-
-class ListInfoItem extends StatelessWidget {
-  final String title;
-  final String icon;
-  final VoidCallback? onTap;
-
-  const ListInfoItem(
-      {super.key, required this.title, required this.icon, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      hoverColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 13),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: const Color(0xFFF5F5F5)),
-        child: ListTile(
-          leading: Image.asset(icon),
-          title: Text(
-            title,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
       ),
     );
   }

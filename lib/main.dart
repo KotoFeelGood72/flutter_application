@@ -9,7 +9,6 @@ import 'package:flutter_application/employee/bloc/employee_bloc.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/notification_service.dart';
 import 'package:flutter_application/service/setup.dart';
-import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_application/widget/failed_internet.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';

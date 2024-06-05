@@ -29,7 +29,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
   UploadTask? _uploadTask;
   final ScrollController _scrollController = ScrollController();
   String apartmentName = '';
-  Map<String, String> userNames = {}; // Store user names by their ID
+  Map<String, String> userNames = {};
 
   @override
   void initState() {
@@ -170,6 +170,25 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     }
   }
 
+  Map<String, List<DocumentSnapshot>> _groupMessagesByDate(
+      List<DocumentSnapshot> messages) {
+    Map<String, List<DocumentSnapshot>> groupedMessages = {};
+
+    for (var message in messages) {
+      var messageData = message.data() as Map<String, dynamic>;
+      var timestamp = messageData['timestamp'] as Timestamp?;
+      if (timestamp != null) {
+        var dateString = DateFormat('yyyy-MM-dd').format(timestamp.toDate());
+        if (!groupedMessages.containsKey(dateString)) {
+          groupedMessages[dateString] = [];
+        }
+        groupedMessages[dateString]!.add(message);
+      }
+    }
+
+    return groupedMessages;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,6 +216,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
                               child: CircularProgressIndicator());
                         }
                         var messages = snapshot.data!.docs;
+                        var groupedMessages = _groupMessagesByDate(messages);
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           _scrollToBottom();
                         });
@@ -205,27 +225,69 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
                               vertical: 10, horizontal: 16),
                           controller: _scrollController,
                           reverse: false,
-                          itemCount: messages.length,
+                          itemCount: groupedMessages.keys.length,
                           itemBuilder: (context, index) {
-                            var message = messages[index];
-                            var messageData =
-                                message.data() as Map<String, dynamic>;
-                            var isMe =
-                                messageData['from'] == _auth.currentUser?.uid;
-                            var isRead = messageData.containsKey('isRead') &&
-                                messageData['isRead'];
-                            var timestamp =
-                                _formatTimestamp(messageData['timestamp']);
-                            var text = messageData['text'] ?? '';
+                            var date = groupedMessages.keys.elementAt(index);
+                            var dailyMessages = groupedMessages[date]!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 3),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          height: 0.3,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Text(
+                                          DateFormat('yyyy-MM-dd')
+                                              .format(DateTime.parse(date)),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.grey[400],
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          height: 0.3,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                ...dailyMessages.map((message) {
+                                  var messageData =
+                                      message.data() as Map<String, dynamic>;
+                                  var isMe = messageData['from'] ==
+                                      _auth.currentUser?.uid;
+                                  var isRead =
+                                      messageData.containsKey('isRead') &&
+                                          messageData['isRead'];
+                                  var timestamp = _formatTimestamp(
+                                      messageData['timestamp']);
+                                  var text = messageData['text'] ?? '';
 
-                            markMessageAsRead(message);
+                                  markMessageAsRead(message);
 
-                            return ChatMessage(
-                              isMe: isMe,
-                              text: text,
-                              timestamp: timestamp,
-                              isRead: isRead,
-                              imageUrl: messageData['imageUrl'],
+                                  return ChatMessage(
+                                    isMe: isMe,
+                                    text: text,
+                                    timestamp: timestamp,
+                                    isRead: isRead,
+                                    imageUrl: messageData['imageUrl'],
+                                  );
+                                }).toList(),
+                              ],
                             );
                           },
                         );

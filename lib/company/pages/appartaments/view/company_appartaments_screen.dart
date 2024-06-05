@@ -32,7 +32,6 @@ class CompanyAppartamentsScreen extends StatefulWidget {
 
 class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
   ApartmentId? apartmentId;
-  // final _companyBloc = CompanyBloc();
   late CompanyBloc _companyBloc;
   List<Map<String, String>> bathrooms = [];
   bool toggle = true;
@@ -242,6 +241,7 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
               ? const Center(child: CircularProgressIndicator())
               : ListView(shrinkWrap: true, children: [
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.only(
                         left: 15, right: 15, bottom: 16, top: 40),
                     color: const Color(0xFF18232D),
@@ -249,6 +249,7 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
                               margin: const EdgeInsets.only(right: 29, top: 8),
@@ -265,22 +266,36 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
                                 ),
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  apartmentId!.apartmentName.toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    apartmentId!.apartmentName.toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                  Text(
+                                    apartmentId!.area.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 16, color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              constraints: BoxConstraints(maxWidth: 20),
+                              decoration: BoxDecoration(),
+                              child: InkWell(
+                                onTap: () {},
+                                child: Icon(
+                                  Icons.more_vert,
+                                  color: Colors.white,
                                 ),
-                                Text(
-                                  apartmentId!.area.toString(),
-                                  style: const TextStyle(
-                                      fontSize: 16, color: Colors.white),
-                                ),
-                              ],
+                              ),
                             )
                           ],
                         ),
@@ -436,18 +451,34 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
                       ],
                     ),
                   ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: bathrooms.length,
-                    itemBuilder: (context, index) {
-                      return BathRooms(
-                        bathroom: bathrooms[index],
-                        index: index,
-                        onRemove: _removeBathroom,
-                      );
-                    },
-                  ),
+                  bathrooms.isEmpty
+                      ? Container(
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 15),
+                            child: Text(
+                              'Add the first bathroom',
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: bathrooms.length,
+                          itemBuilder: (context, index) {
+                            return BathRooms(
+                              bathroom: bathrooms[index],
+                              index: index,
+                              onRemove: _removeBathroom,
+                            );
+                          },
+                        ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -539,7 +570,7 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
                     ),
                   ),
                 ]),
-          bottomNavigationBar: BottomAdminBar(),
+          bottomNavigationBar: const BottomAdminBar(),
         );
       },
     );

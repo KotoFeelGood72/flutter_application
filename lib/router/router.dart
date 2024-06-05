@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/auth/auth.dart';
+import 'package:flutter_application/auth/reset/view/enter_reset_code_screen.dart';
+import 'package:flutter_application/auth/reset/view/reset_password_screen.dart';
 import 'package:flutter_application/client/classes/AuthGuard.dart';
 import 'package:flutter_application/client/pages/contacts/contacts.dart';
 import 'package:flutter_application/client/pages/home/home.dart';
@@ -8,9 +10,9 @@ import 'package:flutter_application/client/pages/finances/finances.dart';
 import 'package:flutter_application/client/pages/inquires/inquires.dart';
 import 'package:flutter_application/client/pages/metters/metters.dart';
 import 'package:flutter_application/client/pages/news/view/news_screen.dart';
-import 'package:flutter_application/client/pages/notification/client_note.dart';
 import 'package:flutter_application/client/pages/profile/profile.dart';
 import 'package:flutter_application/company/pages/appartaments/company_appartaments.dart';
+import 'package:flutter_application/splash_screen.dart';
 import 'package:flutter_application/widget/pages/chat/admin_chat.dart';
 import 'package:flutter_application/company/pages/home/view/company_main_screen.dart';
 import 'package:flutter_application/company/pages/articles/view/view.dart';
@@ -48,13 +50,21 @@ class AppRouter extends _$AppRouter {
             path: '/clients/inquires',
             guards: [AuthGuard()]),
         AutoRoute(
-            page: ClientNoteRoute.page,
-            path: '/clients/notifications',
-            guards: [AuthGuard()]),
-        AutoRoute(
           page: AuthRoute.page,
           path: '/login',
+          // initial: true,
+        ),
+        AutoRoute(
+          page: SplashRoute.page,
           initial: true,
+        ),
+        AutoRoute(
+          page: SendResetEmailRoute.page,
+          path: '/login/reset',
+        ),
+        AutoRoute(
+          page: EnterResetCodeRoute.page,
+          path: '/login/confirm/:email',
         ),
         AutoRoute(
             page: ProfileRoute.page,

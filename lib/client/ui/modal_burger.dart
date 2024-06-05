@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/pages/articles/articles.dart';
 import 'package:flutter_application/router/router.dart';
 
 class ModalBurger extends StatefulWidget {
@@ -40,11 +41,11 @@ class _ModalBurgerState extends State<ModalBurger> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildMenuItem('Finances', 'assets/img/menu-item-1.png',
-                    const FinancesRoute()),
+                    () => _navigate(const FinancesRoute())),
                 _buildMenuItem('Meters', 'assets/img/menu-item-2.png',
-                    const DevelopmentRoute()),
+                    () => _navigate(const MettersRoute())),
                 _buildMenuItem('Inquiries', 'assets/img/menu-item-3.png',
-                    const InquiresRoute()),
+                    () => _navigate(const InquiresRoute())),
               ],
             ),
           ),
@@ -54,11 +55,19 @@ class _ModalBurgerState extends State<ModalBurger> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildMenuItem('Proposals', 'assets/img/menu-item-4.png',
-                    const FinancesRoute()),
-                _buildMenuItem('News', 'assets/img/menu-item-5.png',
-                    const DevelopmentRoute()),
+                    () => _navigate(const FinancesRoute())),
+                _buildMenuItem(
+                    'News',
+                    'assets/img/menu-item-5.png',
+                    () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return ArticlesScreen(type: 'client');
+                          },
+                        )),
                 _buildMenuItem('Notifications', 'assets/img/menu-item-6.png',
-                    const DevelopmentRoute()),
+                    () => _navigate(const NotificationsRoute())),
               ],
             ),
           ),
@@ -173,13 +182,13 @@ class _ModalBurgerState extends State<ModalBurger> {
     );
   }
 
-  Widget _buildMenuItem(String title, String iconPath, PageRouteInfo route) {
+  Widget _buildMenuItem(String title, String iconPath, VoidCallback onTap) {
     return SizedBox(
       width: 95,
       child: InkWell(
         hoverColor: Colors.transparent,
         splashColor: Colors.transparent,
-        onTap: () => AutoRouter.of(context).push(route),
+        onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

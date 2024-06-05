@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
+import 'package:flutter_application/employee/pages/home/employee_home.dart';
 // import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 
@@ -138,30 +139,6 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         ),
       ),
       bottomNavigationBar: BottomAdminBar(),
-    );
-  }
-}
-
-class ListInfoItem extends StatelessWidget {
-  final String title;
-  final String icon;
-
-  const ListInfoItem({super.key, required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 13),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFFF5F5F5)),
-      child: ListTile(
-        leading: Image.asset(icon),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
     );
   }
 }

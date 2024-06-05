@@ -130,51 +130,61 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.only(top: 18, left: 15, right: 15, bottom: 34),
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          const ModalHeader(title: 'Issue an invoice'),
-          const SizedBox(height: 10),
-          Container(
-            height: 50,
-            margin: const EdgeInsets.only(bottom: 13),
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.circular(14)),
-            child: Text(appartament['name'] ?? 'No appartament'),
+    return SafeArea(
+      child: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          IssueInvoiceList(
-            servicesList: combinedServiceList,
-            selectedService: selectedService,
-            onSelected: (service) {
-              setState(() => selectedService = service);
-            },
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.only(top: 18, left: 15, right: 15, bottom: 34),
+            child: Column(
+              children: [
+                const ModalHeader(title: 'Issue an invoice'),
+                const SizedBox(height: 10),
+                Container(
+                  height: 50,
+                  margin: const EdgeInsets.only(bottom: 13),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(appartament['name'] ?? 'No appartament'),
+                ),
+                IssueInvoiceList(
+                  servicesList: combinedServiceList,
+                  selectedService: selectedService,
+                  onSelected: (service) {
+                    setState(() => selectedService = service);
+                  },
+                ),
+                const SizedBox(height: 10),
+                UkTextField(
+                  hint: 'Bill number',
+                  controller: billNumberController,
+                ),
+                const SizedBox(height: 10),
+                UkTextField(hint: 'The amount', controller: amountController),
+                const SizedBox(height: 10),
+                UkTextField(
+                  hint: 'Comment',
+                  maxLines: 3,
+                  controller: commentController,
+                ),
+                const SizedBox(height: 10),
+                CustomBtn(
+                  title: 'Issue an invoice',
+                  onPressed: fetchInvoice,
+                  height: 55,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          UkTextField(
-            hint: 'Bill number',
-            controller: billNumberController,
-          ),
-          const SizedBox(height: 10),
-          UkTextField(hint: 'The amount', controller: amountController),
-          const SizedBox(height: 10),
-          UkTextField(
-            hint: 'Comment',
-            maxLines: 3,
-            controller: commentController,
-          ),
-          const SizedBox(height: 10),
-          CustomBtn(
-            title: 'Issue an invoice',
-            onPressed: fetchInvoice,
-            height: 55,
-          )
-        ],
+        ),
       ),
     );
   }
