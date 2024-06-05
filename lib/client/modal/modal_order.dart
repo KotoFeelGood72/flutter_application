@@ -260,7 +260,7 @@ class _ModalOrderState extends State<ModalOrder> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Desired completion date:',
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: TextStyle(fontSize: 14),
                 ),
               ),
               Container(
@@ -319,7 +319,7 @@ class _ModalOrderState extends State<ModalOrder> {
                         margin: const EdgeInsets.only(bottom: 18),
                         child: Text(
                           'Types of services:',
-                          style: Theme.of(context).textTheme.subtitle1,
+                          style: TextStyle(fontSize: 14),
                         ),
                       ),
                       Wrap(
