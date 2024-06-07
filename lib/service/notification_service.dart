@@ -1,14 +1,15 @@
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application/client/modal/client_modal_order.dart';
 import 'package:flutter_application/company/modal/ModalInfo/info_order_modal.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/setup.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -27,8 +28,12 @@ class NotificationService {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final InitializationSettings initializationSettings =
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
+
+    const InitializationSettings initializationSettings =
         InitializationSettings(
+      iOS: initializationSettingsDarwin,
       android: initializationSettingsAndroid,
     );
 
@@ -49,7 +54,7 @@ class NotificationService {
     required String body,
     required Map<String, dynamic> payload,
   }) async {
-    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'smart_appart',
       'your_channel_name',
@@ -59,7 +64,7 @@ class NotificationService {
       icon: '@mipmap/ic_launcher',
     );
 
-    final NotificationDetails platformChannelSpecifics =
+    const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await flutterLocalNotificationsPlugin.show(
@@ -100,7 +105,7 @@ class NotificationService {
 
     if (role == null) {
       debugPrint('User role not found');
-      appRouter.push(DevelopmentRoute());
+      appRouter.push(const DevelopmentRoute());
       return;
     }
 
@@ -123,7 +128,7 @@ class NotificationService {
           );
           break;
         default:
-          appRouter.push(DevelopmentRoute());
+          appRouter.push(const DevelopmentRoute());
       }
     }
     if (data['screen'] == 'order') {
@@ -160,7 +165,7 @@ class NotificationService {
           );
           break;
         default:
-          appRouter.push(DevelopmentRoute());
+          appRouter.push(const DevelopmentRoute());
       }
     }
   }

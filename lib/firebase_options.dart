@@ -75,10 +75,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDPfjsPEfBHUDm3tfaopLwQc4mEcnBieAM',
-    appId: '1:188375719694:ios:7b378c4cd5fbabbc82815f',
+    appId: '1:188375719694:ios:bb87bfc99a9c3c3682815f',
     messagingSenderId: '188375719694',
     projectId: 'app-house-d0ac1',
     storageBucket: 'app-house-d0ac1.appspot.com',
-    iosBundleId: 'com.example.flutterApplication',
+    iosBundleId: 'com.smartappart',
   );
+
 }

@@ -1,8 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
 import 'package:flutter_application/employee/bloc/employee_bloc.dart';
@@ -11,10 +15,8 @@ import 'package:flutter_application/service/notification_service.dart';
 import 'package:flutter_application/service/setup.dart';
 import 'package:flutter_application/widget/failed_internet.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:async';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +73,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<bool> _checkInternetConnection() async {
     try {
-      final result = await InternetAddress.lookup('example.com');
+      final result = await InternetAddress.lookup('google.com');
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
       return false;

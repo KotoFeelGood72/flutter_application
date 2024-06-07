@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Это позволит добавлять фотографию в ваш профиль и в галерею изображений в приложение</string>
 	<key>CFBundleDisplayName</key>
 	<string>Smart Appart</string>
 	<key>CFBundleExecutable</key>
@@ -45,8 +47,6 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	
-	<!-- Добавляемые ключи -->
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>UIBackgroundModes</key>
