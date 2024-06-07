@@ -33,7 +33,7 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
   String? dropdownValue;
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
-  String? chatRoomId; // New state variable to store chat room ID
+  String? chatRoomId;
 
   @override
   void dispose() {
@@ -47,7 +47,7 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
     super.initState();
     _companyBloc = context.read<CompanyBloc>();
     _getSingleOrder();
-    _getChatRoomId(widget.appartmentId); // Call the method to get chat room ID
+    _getChatRoomId(widget.appartmentId);
   }
 
   void _showSuccessMessage() {
@@ -134,7 +134,6 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
           if (mounted) {
             setState(() {
               chatRoomId = doc.id;
-              print('Chat Room ID: $chatRoomId');
             });
           }
           return;
@@ -155,8 +154,6 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
         ),
       );
     }
-
-    // bool isCompleted = true;
     bool isCompleted = orderData['status'] == 'completed';
 
     return Container(

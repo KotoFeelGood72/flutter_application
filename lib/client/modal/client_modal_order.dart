@@ -54,8 +54,6 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
         });
       }
 
-      print('Appartment ID from widget: ${widget.appartmentId}');
-      // После получения данных о заказе, ищем комнату чата
       _getChatRoomId(widget.appartmentId);
     } catch (e) {
       print(e);
@@ -73,13 +71,10 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
           await FirebaseFirestore.instance.collection('rooms').get();
 
       for (var doc in querySnapshot.docs) {
-        print('${doc['apartmentId']} Good apparta');
         if (doc['apartmentId'] == appartmentId) {
-          print('Found document with appartmentId: ${doc['apartmentId']}');
           if (mounted) {
             setState(() {
               chatRoomId = doc.id;
-              print('Chat Room ID: $chatRoomId');
             });
           }
           return;
@@ -260,17 +255,30 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
               onPressed: () {
                 AutoRouter.of(context).push(AdminChatRoute(id: chatRoomId!));
               },
-            )
-          else
+            ),
+          const SizedBox(height: 20),
+          if (orderData!.status == 'completed')
             Container(
-              alignment: Alignment.center,
-              child: const Text(
-                'Chat room not found',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomBtn(
+                      title: 'Oproove',
+                      color: Colors.red,
+                      onPressed: () {},
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: CustomBtn(
+                      title: 'Appreciate',
+                      color: Colors.green,
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
               ),
             ),
         ],

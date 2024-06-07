@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
+import 'package:flutter_application/components/modal/user_settings.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/employee/bloc/employee_bloc.dart';
@@ -126,18 +127,36 @@ class _EmployProfileScreenState extends State<EmployProfileScreen> {
                               title: userProfile.objectName,
                               icon: 'assets/img/mini-user.png',
                             ),
+                            ListInfoItem(
+                              title: 'Edit profile',
+                              icon: 'assets/img/mini-user.png',
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(0),
+                                  ),
+                                  builder: (BuildContext context) {
+                                    return UserSettings(
+                                      userRole: 'Employee',
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: CustomBtn(
+                          title: 'Logout',
+                          onPressed: () => _signOut(context),
+                          color: const Color(0xFFBE6161),
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: CustomBtn(
-                    title: 'Logout',
-                    onPressed: () => _signOut(context),
-                    color: const Color(0xFFBE6161),
                   ),
                 ),
                 const SizedBox(height: 20),

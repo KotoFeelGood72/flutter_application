@@ -155,7 +155,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(0),
                             ),
                             builder: (BuildContext context) {
-                              return UserSettings();
+                              return UserSettings(
+                                userRole: 'client',
+                              );
                             },
                           );
                         },

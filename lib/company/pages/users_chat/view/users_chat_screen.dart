@@ -26,9 +26,21 @@ class _UsersChatScreenState extends State<UsersChatScreen> {
   }
 
   Future<void> _loadRooms() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('rooms').get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('rooms')
+          .where('user_id', arrayContains: currentUser.uid)
+          .get();
+
       List<Map<String, dynamic>> rooms =
           await Future.wait(snapshot.docs.map((doc) async {
         var roomData = doc.data() as Map<String, dynamic>;
@@ -41,7 +53,7 @@ class _UsersChatScreenState extends State<UsersChatScreen> {
         int unreadCount = messagesSnapshot.docs
             .where((message) =>
                 message['isRead'] == false &&
-                message['from'] != FirebaseAuth.instance.currentUser?.uid)
+                message['from'] != currentUser.uid)
             .length;
         var lastMessageDoc = messagesSnapshot.docs.isNotEmpty
             ? messagesSnapshot.docs.first

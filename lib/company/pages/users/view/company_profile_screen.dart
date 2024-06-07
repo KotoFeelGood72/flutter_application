@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/components/modal/user_settings.dart';
 import 'package:flutter_application/employee/pages/home/employee_home.dart';
 import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,7 +75,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
         print("Error loading the image: $e");
       } finally {
         setState(() {
-          isUploading = false; // Set uploading state to false
+          isUploading = false;
         });
       }
     } else {
@@ -136,6 +137,24 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                                 ListInfoItem(
                                     title: contact.email ?? '',
                                     icon: 'assets/img/mini-mail.png'),
+                              ListInfoItem(
+                                title: 'Edit profile',
+                                icon: 'assets/img/mini-user.png',
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(0),
+                                    ),
+                                    builder: (BuildContext context) {
+                                      return UserSettings(
+                                        userRole: 'Company',
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                             ],
                           );
                         }).toList();

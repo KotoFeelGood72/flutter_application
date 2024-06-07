@@ -279,7 +279,7 @@ class InqServiceChip extends StatelessWidget {
         textColor = Colors.orange;
         break;
       case 'completed':
-        textColor = Colors.white;
+        textColor = Colors.green;
         break;
       case 'new':
         textColor = const Color(0xFF6873D1);
