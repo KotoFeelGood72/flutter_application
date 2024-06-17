@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/client/bloc/client_bloc.dart';
@@ -15,10 +18,13 @@ import 'package:flutter_application/service/notification_service.dart';
 import 'package:flutter_application/service/setup.dart';
 import 'package:flutter_application/widget/failed_internet.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'firebase_options.dart';
 import 'firebase_options.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
