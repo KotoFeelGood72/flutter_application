@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DioSingleton {
   static final DioSingleton _instance = DioSingleton._internal();
@@ -12,7 +13,10 @@ class DioSingleton {
 
   DioSingleton._internal() {
     _dio = Dio();
-    _dio.options.baseUrl = 'http://217.25.95.113:8000/api/v1/';
+    final baseUrl = bool.fromEnvironment('dart.vm.product')
+        ? dotenv.env['BASE_URL_PROD']!
+        : dotenv.env['BASE_URL_DEV']!;
+    _dio.options.baseUrl = baseUrl;
     _dio.options.headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',

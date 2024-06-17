@@ -24,7 +24,7 @@ class NotificationService {
   NotificationService._internal();
 
   Future<void> init() async {
-    debugPrint('Initializing Notification Service');
+    // debugPrint('Initializing Notification Service');
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
