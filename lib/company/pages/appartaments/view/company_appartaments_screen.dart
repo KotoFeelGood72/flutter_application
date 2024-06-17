@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
 import 'dart:math' as math;
@@ -12,6 +13,7 @@ import 'package:flutter_application/company/modal/ModalAdd/add_tenant_modal.dart
 import 'package:flutter_application/company/modal/ModalInfo/info_metter_modal.dart';
 import 'package:flutter_application/company/modal/ModalInfo/list_tenant_modal.dart';
 import 'package:flutter_application/company/modal/ModalInfo/payment/info_payment_modal.dart';
+import 'package:flutter_application/company/modal/edit_apartment_modal.dart';
 import 'package:flutter_application/company/modal/service_orders_modal.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
@@ -132,6 +134,32 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
       currentIndex = (currentIndex + 1) % itemsToAdd.length;
     }
   }
+
+  // Future<void> _editApartment(ApartmentId updatedApartment) async {
+  //   try {
+  //     final formData = FormData.fromMap({
+  //       'name': updatedApartment.apartmentName,
+  //       'area': updatedApartment.area,
+  //       if (updatedApartment.photoPath != null)
+  //         'image': await MultipartFile.fromFile(updatedApartment.photoPath!),
+  //     });
+
+  //     final response = await DioSingleton().dio.put(
+  //           'employee/apartments/apartment_info/${widget.id}/update-info',
+  //           data: formData,
+  //         );
+
+  //     if (response.statusCode == 200) {
+  //       setState(() {
+  //         apartmentId = updatedApartment;
+  //       });
+  //     } else {
+  //       // Handle error
+  //     }
+  //   } catch (e) {
+  //     // Handle error
+  //   }
+  // }
 
   Future<void> _removeBathroom(int index) async {
     String bathroomId = bathrooms[index]['id'] ?? '';
@@ -290,7 +318,20 @@ class _CompanyAppartamentsScreenState extends State<CompanyAppartamentsScreen> {
                               constraints: BoxConstraints(maxWidth: 20),
                               decoration: BoxDecoration(),
                               child: InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    builder: (context) {
+                                      return EditApartmentModal(
+                                        apartment: apartmentId!,
+                                      );
+                                    },
+                                  );
+                                },
                                 child: Icon(
                                   Icons.more_vert,
                                   color: Colors.white,

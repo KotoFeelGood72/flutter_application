@@ -13,6 +13,7 @@ import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/employee/pages/home/employee_home.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_application/widget/action_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 final _router = AppRouter();
@@ -162,12 +163,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                       ),
-                      const CustomBtn(
-                        title: 'Logout',
-                        onPressed: _signOut,
-                        height: 55,
-                        color: Color(0xFFBE6161),
-                      )
+                      ActionButtons(),
+                      // Action(),
+                      // Row(children: [
+                      //   CustomBtn(
+                      //     title: 'Logout',
+                      //     onPressed: _signOut,
+                      //     height: 55,
+                      //     color: Color(0xFFBE6161),
+                      //   ),
+                      //   CustomBtn(
+                      //     title: 'Logout',
+                      //     onPressed: _signOut,
+                      //     height: 55,
+                      //     color: Color(0xFFBE6161),
+                      //   )
+                      // ]),
                     ],
                   ),
                 )

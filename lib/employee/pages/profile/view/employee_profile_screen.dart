@@ -13,6 +13,7 @@ import 'package:flutter_application/employee/bloc/employee_bloc.dart';
 import 'package:flutter_application/employee/pages/home/employee_home.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_application/widget/action_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 final _router = AppRouter();
@@ -149,13 +150,8 @@ class _EmployProfileScreenState extends State<EmployProfileScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: CustomBtn(
-                          title: 'Logout',
-                          onPressed: () => _signOut(context),
-                          color: const Color(0xFFBE6161),
-                        ),
-                      ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: ActionButtons()),
                     ],
                   ),
                 ),

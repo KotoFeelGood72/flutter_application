@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/modal/user_settings.dart';
 import 'package:flutter_application/employee/pages/home/employee_home.dart';
+import 'package:flutter_application/widget/action_buttons.dart';
 import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
@@ -18,14 +19,14 @@ import 'package:flutter_application/service/dio_config.dart';
 
 final _router = AppRouter();
 
-Future<void> _signOut() async {
-  try {
-    await FirebaseAuth.instance.signOut();
-    _router.push(const AuthRoute());
-  } catch (e) {
-    print("Error on exit: $e");
-  }
-}
+// Future<void> _signOut() async {
+//   try {
+//     await FirebaseAuth.instance.signOut();
+//     _router.push(const AuthRoute());
+//   } catch (e) {
+//     print("Error on exit: $e");
+//   }
+// }
 
 @RoutePage()
 class CompanyProfileScreen extends StatefulWidget {
@@ -175,11 +176,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                           shrinkWrap: true,
                           children: [
                             ...contactWidgets,
-                            CustomBtn(
-                              title: 'Logout',
-                              onPressed: _signOut,
-                              color: Color(0xFFBE6161),
-                            ),
+                            ActionButtons(),
                             const SizedBox(height: 30)
                           ],
                         ),
