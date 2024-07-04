@@ -81,5 +81,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'app-house-d0ac1.appspot.com',
     iosBundleId: 'com.smartappart',
   );
-
 }

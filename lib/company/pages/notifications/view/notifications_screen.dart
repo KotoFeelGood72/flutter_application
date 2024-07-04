@@ -94,7 +94,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         case 'Company':
         case 'Employee':
           if (type == 'order') {
-            Navigator.pop(context);
+            // Navigator.pop(context);
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -109,7 +109,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           break;
         case 'client':
           if (type == 'order') {
-            Navigator.pop(context);
+            // Navigator.pop(context);
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -119,7 +119,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               },
             );
           } else if (type == 'news') {
-            Navigator.pop(context);
+            // Navigator.pop(context);
             AutoRouter.of(context)
                 .push(NewsRoute(id: int.parse(id), type: 'client'));
           }
