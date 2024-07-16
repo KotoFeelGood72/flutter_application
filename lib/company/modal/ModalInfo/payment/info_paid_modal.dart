@@ -90,6 +90,7 @@ class _InfoPaidModalState extends State<InfoPaidModal> {
       );
     } else {
       return Container(
+        constraints: BoxConstraints(maxHeight: 500),
         padding: const EdgeInsets.only(top: 25),
         color: Colors.white,
         child: ListView(

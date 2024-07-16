@@ -21,6 +21,7 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
       TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -59,6 +60,10 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
   }
 
   Future<void> _createEmployee() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final Map<String, dynamic> employee = {
       "object_id": selectedObjectId,
       "first_last_name": _firstNameLastNameController.text,
@@ -68,7 +73,6 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
     };
 
     try {
-      // ignore: unused_local_variable
       await DioSingleton()
           .dio
           .post('add_employee_uk/$selectedObjectId', data: employee);
@@ -83,9 +87,15 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
               message: "The employee has been successfully added");
         },
       );
-
-      // ignore: empty_catches
-    } catch (e) {}
+    } catch (e) {
+      // Handle error appropriately
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -153,11 +163,11 @@ class _AddEmployeModalState extends State<AddEmployeModal> {
                 },
               ),
               CustomBtn(
-                  title: 'Add an employee',
-                  height: 55,
-                  onPressed: () {
-                    _createEmployee();
-                  })
+                title: 'Add an employee',
+                height: 55,
+                onPressed: _createEmployee,
+                isLoading: _isLoading,
+              ),
             ],
           ),
         ),

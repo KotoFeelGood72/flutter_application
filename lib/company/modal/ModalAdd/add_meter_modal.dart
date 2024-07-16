@@ -22,6 +22,7 @@ class _AddMeterModalState extends State<AddMeterModal> {
   final TextEditingController comment = TextEditingController();
   String selectedApartmentId = '';
   String? selectedMeterId;
+  bool _isLoading = false;
 
   List<Map<String, dynamic>> meterList = [
     {'name': 'Electricity', 'id': '1'},
@@ -52,6 +53,10 @@ class _AddMeterModalState extends State<AddMeterModal> {
   }
 
   Future<void> fetchMeter() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final data = {
         "apartment_id": appartament!.id,
@@ -65,18 +70,23 @@ class _AddMeterModalState extends State<AddMeterModal> {
       await DioSingleton().dio.post(
           'employee/apartments/apartment_info/${widget.id}/enter_meters',
           data: data);
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
-      // ignore: use_build_context_synchronously
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return const SuccessModal(
-              message: "Invoice has been successfully issued.");
-        },
-      );
+
+      if (mounted) {
+        Navigator.pop(context);
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return const SuccessModal(
+                message: "Invoice has been successfully issued.");
+          },
+        );
+      }
     } catch (e) {
       print("Ошибка при отправке данных: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -146,7 +156,8 @@ class _AddMeterModalState extends State<AddMeterModal> {
                 title: 'Enter meter readings',
                 onPressed: fetchMeter,
                 height: 55,
-              )
+                isLoading: _isLoading,
+              ),
             ],
           ),
         ),

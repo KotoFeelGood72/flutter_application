@@ -243,7 +243,7 @@ class _ObjectSingleScreenState extends State<ObjectSingleScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(15),
                       child: Image.network(
-                        object['main_photo_path'],
+                        object['main_photo_path'] ?? '',
                         fit: BoxFit.cover,
                       ),
                     ),

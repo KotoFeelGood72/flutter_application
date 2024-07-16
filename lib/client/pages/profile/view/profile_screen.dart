@@ -15,6 +15,7 @@ import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_application/widget/action_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 final _router = AppRouter();
 
@@ -37,24 +38,37 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isLoading = true;
-
+  bool isUploading = false;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
     super.initState();
     BlocProvider.of<ClientBloc>(context).add(ClientInfoUser());
   }
 
-  Future<void> _uploadImg() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (result != null) {
-      File imageFile = File(result.files.single.path!);
-      String? originalFileName = result.files.single.name;
+    if (image != null) {
+      setState(() {
+        _image = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _uploadImg() async {
+    setState(() {
+      isUploading = true;
+    });
+
+    await _pickImage();
+
+    if (_image != null) {
+      String? originalFileName = _image!.path.split('/').last;
 
       FormData formData = FormData.fromMap({
-        "photo": await MultipartFile.fromFile(imageFile.path,
+        "photo": await MultipartFile.fromFile(_image!.path,
             filename: originalFileName),
       });
 
@@ -67,8 +81,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } catch (e) {
         print("Ошибка при отправке данных: $e");
       }
+
+      BlocProvider.of<ClientBloc>(context).add(ClientInfoUser());
     } else {
-      print("Выбор файла отменен");
+      print("The file selection has been canceled");
+      setState(() {
+        isUploading = false;
+      });
     }
   }
 

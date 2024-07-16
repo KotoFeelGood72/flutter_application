@@ -16,8 +16,17 @@ import 'package:flutter_application/service/setup.dart';
 import 'package:flutter_application/widget/failed_internet.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'dart:io';
 import 'firebase_options.dart';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -30,6 +39,7 @@ void main() async {
   final NotificationService notificationService = NotificationService();
   await notificationService.init();
   setup();
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
 

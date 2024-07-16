@@ -35,6 +35,7 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
   List<ApartmentService> combinedServiceList = [];
 
   ApartmentService? selectedService;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -114,6 +115,10 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
       "comment": commentController.text,
     };
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       await DioSingleton().dio.post(
             'employee/apartments/apartment_info/${widget.id}/invoice',
@@ -125,6 +130,10 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
       }
     } catch (e) {
       print("Ошибка при отправке данных: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -180,6 +189,7 @@ class _AddIssueInvoiceState extends State<AddIssueInvoice> {
                   title: 'Issue an invoice',
                   onPressed: fetchInvoice,
                   height: 55,
+                  isLoading: _isLoading,
                 ),
               ],
             ),

@@ -20,11 +20,11 @@ class Tenant {
   factory Tenant.fromJson(Map<String, dynamic> json) {
     return Tenant(
       id: json['id'] ?? 0,
-      firstname: json['first_name'],
-      lastname: json['last_name'],
-      phoneNumber: json['phone_number'],
-      email: json['email'],
-      photoPath: json['photo_path'],
+      firstname: json['first_name'] ?? '',
+      lastname: json['last_name'] ?? '',
+      phoneNumber: json['phone_number'] ?? '',
+      email: json['email'] ?? '',
+      photoPath: json['photo_path'] ?? '',
       balance: json['balance'].toDouble(),
     );
   }

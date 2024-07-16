@@ -58,6 +58,7 @@ class _UserProfileHeaderState extends State<UserProfileHeader> {
                     _isImageLoaded = false;
                   });
                 }
+                debugPrint('Error loading image: $exception');
               },
             ),
           );

@@ -54,7 +54,7 @@ class ServiceStateItem extends StatelessWidget {
     return InkWell(
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
-      onTap: onTap,
+      onTap: onTap, // Использование параметра onTap
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15),
         child: Stack(

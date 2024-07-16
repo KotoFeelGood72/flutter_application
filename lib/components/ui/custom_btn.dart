@@ -7,6 +7,7 @@ class CustomBtn extends StatelessWidget {
   final double height;
   final double borderRadius;
   final Icon? icon;
+  final bool? isLoading;
 
   const CustomBtn({
     super.key,
@@ -16,6 +17,7 @@ class CustomBtn extends StatelessWidget {
     this.height = 60.0,
     this.borderRadius = 15.0,
     this.icon,
+    this.isLoading,
   });
 
   @override
@@ -25,15 +27,26 @@ class CustomBtn extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        color: color,
+        color: isLoading == true ? Colors.grey : color,
       ),
       child: TextButton(
-        onPressed: onPressed,
+        onPressed: isLoading == true ? null : onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) icon!,
             if (icon != null && title != null) const SizedBox(width: 8.0),
+            if (isLoading == true)
+              Container(
+                width: 24,
+                height: 24,
+                margin: EdgeInsets.only(right: 10),
+                padding: const EdgeInsets.all(2.0),
+                child: const CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              ),
             if (title != null)
               Text(
                 title!,

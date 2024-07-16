@@ -37,6 +37,7 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
       TextEditingController();
   File? _image;
   String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -86,6 +87,7 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
     }
 
     setState(() {
+      _isLoading = true;
       _errorMessage = null;
     });
 
@@ -116,7 +118,6 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
       }
 
       if (response.statusCode == 201) {
-        // Assuming the response contains the created apartment data
         var apartment = response.data;
 
         // Get the current user's UID
@@ -131,10 +132,7 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
           'apartmentId': apartment['id'],
           'apartmentName': apartment['apartment_name'],
           'created_at': FieldValue.serverTimestamp(),
-          'user_id': [
-            currentUser.uid
-          ], // Add current user's UID to the user_id array
-          // add other necessary fields
+          'user_id': [currentUser.uid],
         });
 
         Navigator.pop(context);
@@ -143,11 +141,14 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
         _showErrorMessage("Failed to create apartment");
       }
     } catch (e) {
-      print("Ошибка при создании апартамента: $e");
       if (e is DioError) {
         print('Dio error: ${e.response?.statusCode} ${e.response?.data}');
       }
       _showErrorMessage("Failed to create apartment");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -303,6 +304,7 @@ class _AddAppartamentsModalState extends State<AddAppartamentsModal> {
                   CustomBtn(
                     title: 'Add appartaments',
                     onPressed: _createAppartaments,
+                    isLoading: _isLoading,
                   ),
                 ],
               ),
