@@ -2,6 +2,7 @@ import 'package:dio/dio.dart'; // Добавьте этот импорт
 import 'package:flutter/material.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
+import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/uk_text_field.dart';
 import 'package:flutter_application/models/Appartments.dart';
 import 'package:flutter_application/service/dio_config.dart';
@@ -25,6 +26,7 @@ class _AddTenantModalState extends State<AddTenantModal> {
   final TextEditingController _emailController = TextEditingController();
   bool _isEmailValid = false;
   String? _errorMessage;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -57,12 +59,25 @@ class _AddTenantModalState extends State<AddTenantModal> {
   }
 
   Future<void> _createTenant() async {
+    if (_firstNameLastNameController.text.isEmpty ||
+        _phoneNumberController.text.isEmpty ||
+        _emailController.text.isEmpty) {
+      setState(() {
+        _isEmailValid = true;
+      });
+      return;
+    }
+
     final Map<String, dynamic> tenant = {
       "first_last_name": _firstNameLastNameController.text,
       "phone_number": _phoneNumberController.text,
       "email": _emailController.text,
       "password": _generatedPassword
     };
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final response = await DioSingleton().dio.post(
@@ -83,7 +98,15 @@ class _AddTenantModalState extends State<AddTenantModal> {
           _isEmailValid = true;
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      setState(() {
+        _isEmailValid = true;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -154,27 +177,11 @@ class _AddTenantModalState extends State<AddTenantModal> {
                     });
                   },
                 ),
-                Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color(0xFF6873D1),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: TextButton(
-                        onPressed: () {
-                          _createTenant();
-                        },
-                        child: const Text(
-                          'Add a tenant',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
-                    ))
+                CustomBtn(
+                  title: 'Add a tenant',
+                  onPressed: _createTenant,
+                  isLoading: _isLoading,
+                ),
               ],
             ),
           ),

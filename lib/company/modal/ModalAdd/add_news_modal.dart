@@ -23,6 +23,7 @@ class _AddNewsModalState extends State<AddNewsModal> {
   final List<XFile> _mediaList = [];
   List<UserItemNews> userItemNewsList = [];
   UserItemNews? selectedUserItem;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -99,6 +100,10 @@ class _AddNewsModalState extends State<AddNewsModal> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     FormData formData = FormData.fromMap({
       "name": _titleController.text,
       "description": _textarea.text,
@@ -120,6 +125,10 @@ class _AddNewsModalState extends State<AddNewsModal> {
       if (e is DioError) {
         print('Dio error: ${e.response?.statusCode} ${e.response?.data}');
       }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -273,6 +282,7 @@ class _AddNewsModalState extends State<AddNewsModal> {
                 CustomBtn(
                   title: 'To publish',
                   onPressed: _createNews,
+                  isLoading: _isLoading,
                 ),
               ],
             )

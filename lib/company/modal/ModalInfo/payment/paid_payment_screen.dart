@@ -21,7 +21,7 @@ class _PaidPaymentScreenState extends State<PaidPaymentScreen> {
     try {
       final response = await DioSingleton().dio.get(
           'employee/apartments/apartment_info/${widget.id}/payment-history/paid');
-      if (response.data != null) {
+      if (response.data != null && mounted) {
         setState(() {
           payments = DayList.fromJson(response.data as List<dynamic>);
           isLoading = false;
@@ -29,9 +29,11 @@ class _PaidPaymentScreenState extends State<PaidPaymentScreen> {
       }
     } catch (e) {
       print("Ошибка при получении данных: $e");
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -39,6 +41,12 @@ class _PaidPaymentScreenState extends State<PaidPaymentScreen> {
   void initState() {
     super.initState();
     _getInvoiceUnPaid();
+  }
+
+  @override
+  void dispose() {
+    // Отмените все асинхронные операции, если это необходимо.
+    super.dispose();
   }
 
   @override

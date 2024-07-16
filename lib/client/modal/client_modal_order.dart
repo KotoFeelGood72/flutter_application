@@ -263,7 +263,7 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
                 children: [
                   Expanded(
                     child: CustomBtn(
-                      title: 'Oproove',
+                      title: 'Deprecate',
                       color: Colors.red,
                       onPressed: () {},
                     ),

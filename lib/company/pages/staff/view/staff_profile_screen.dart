@@ -7,44 +7,47 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
+import 'package:flutter_application/employee/bloc/employee_bloc.dart';
 import 'package:flutter_application/employee/pages/home/employee_home.dart';
 // import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 // final _router = AppRouter();
 
 // ignore: unused_element
-Future<void> _uploadImg() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.image,
-  );
+// Future<void> _uploadImg() async {
+//   FilePickerResult? result = await FilePicker.platform.pickFiles(
+//     type: FileType.image,
+//   );
 
-  if (result != null) {
-    File imageFile = File(result.files.single.path!);
+//   if (result != null) {
+//     File imageFile = File(result.files.single.path!);
 
-    FormData formData = FormData.fromMap({
-      "photo":
-          await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
-    });
+//     FormData formData = FormData.fromMap({
+//       "photo":
+//           await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
+//     });
 
-    // print(formData.fields);
-    // print(formData.files);
+//     // print(formData.fields);
+//     // print(formData.files);
 
-    try {
-      // ignore: unused_local_variable
-      final response =
-          await DioSingleton().dio.post('add_photo', data: formData);
-      // print('Ответ сервера: $response');
-    } catch (e) {
-      // ignore: avoid_print
-      print("Ошибка при загрузке изображения: $e");
-    }
-  } else {
-    // Пользователь отменил выбор файла
-    // ignore: avoid_print
-    print("Выбор файла отменен");
-  }
-}
+//     try {
+//       // ignore: unused_local_variable
+//       final response =
+//           await DioSingleton().dio.post('add_photo', data: formData);
+//       // print('Ответ сервера: $response');
+//     } catch (e) {
+//       // ignore: avoid_print
+//       print("Ошибка при загрузке изображения: $e");
+//     }
+//   } else {
+//     // Пользователь отменил выбор файла
+//     // ignore: avoid_print
+//     print("Выбор файла отменен");
+//   }
+// }
 
 @RoutePage()
 class StaffProfileScreen extends StatefulWidget {
@@ -59,12 +62,69 @@ class StaffProfileScreen extends StatefulWidget {
 class _StaffProfileScreenState extends State<StaffProfileScreen> {
   // String? userImg;
   Map<String?, dynamic> userProfile = {};
+  bool isUploading = false;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
     _getUserInfo();
     // _getUserImg();
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _image = File(image.path);
+      });
+    }
+  }
+
+  Future<void> _uploadImg() async {
+    setState(() {
+      isUploading = true;
+    });
+
+    await _pickImage();
+
+    if (_image != null) {
+      String? originalFileName = _image!.path.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        "photo": await MultipartFile.fromFile(_image!.path,
+            filename: originalFileName),
+      });
+
+      try {
+        var response = await DioSingleton()
+            .dio
+            .post('get_profile_uk/add_photo', data: formData);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          print("The image has been uploaded successfully");
+          if (mounted) {
+            setState(() {
+              context.read<EmployeeBloc>().add(EmployeeLoaded());
+            });
+          }
+        } else {
+          print("Error loading the image: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error loading the image: $e");
+      } finally {
+        setState(() {
+          isUploading = false;
+        });
+      }
+    } else {
+      print("The file selection has been canceled");
+      setState(() {
+        isUploading = false;
+      });
+    }
   }
 
   Future<void> _getUserInfo() async {

@@ -2,31 +2,21 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/modal/user_settings.dart';
-import 'package:flutter_application/employee/pages/home/employee_home.dart';
+import 'package:flutter_application/components/ui/list_info_item.dart';
 import 'package:flutter_application/widget/action_buttons.dart';
 import 'package:flutter_application/widget/empty_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
 import 'package:flutter_application/components/bottom_admin_bar.dart';
-import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/user_profile_header.dart';
 import 'package:flutter_application/router/router.dart';
 import 'package:flutter_application/service/dio_config.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final _router = AppRouter();
-
-// Future<void> _signOut() async {
-//   try {
-//     await FirebaseAuth.instance.signOut();
-//     _router.push(const AuthRoute());
-//   } catch (e) {
-//     print("Error on exit: $e");
-//   }
-// }
 
 @RoutePage()
 class CompanyProfileScreen extends StatefulWidget {
@@ -39,22 +29,31 @@ class CompanyProfileScreen extends StatefulWidget {
 class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   bool isLoading = true;
   bool isUploading = false;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _image = File(image.path);
+      });
+    }
+  }
 
   Future<void> _uploadImg() async {
     setState(() {
       isUploading = true;
     });
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
+    await _pickImage();
 
-    if (result != null) {
-      File imageFile = File(result.files.single.path!);
-      String? originalFileName = result.files.single.name;
+    if (_image != null) {
+      String? originalFileName = _image!.path.split('/').last;
 
       FormData formData = FormData.fromMap({
-        "photo": await MultipartFile.fromFile(imageFile.path,
+        "photo": await MultipartFile.fromFile(_image!.path,
             filename: originalFileName),
       });
 

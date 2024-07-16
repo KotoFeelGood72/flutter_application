@@ -7,7 +7,7 @@ class NotificationModel {
   final bool isView;
   final String type;
   final int contentId;
-  final String image;
+  final String? image;
   final int? apartmentId;
 
   NotificationModel({
@@ -19,7 +19,7 @@ class NotificationModel {
     required this.isView,
     required this.type,
     required this.contentId,
-    required this.image,
+    this.image,
     this.apartmentId,
   });
 

@@ -10,18 +10,19 @@ class UnpaidPaymentScreen extends StatefulWidget {
   const UnpaidPaymentScreen({super.key, required this.id});
 
   @override
-  State<UnpaidPaymentScreen> createState() => _UnpaidPaymentScreenState();
+  State<UnpaidPaymentScreen> createState() => _PaidPaymentScreenState();
 }
 
-class _UnpaidPaymentScreenState extends State<UnpaidPaymentScreen> {
+class _PaidPaymentScreenState extends State<UnpaidPaymentScreen> {
   DayList? payments;
   bool isLoading = true;
+  bool _disposed = false; // Для отслеживания dispose состояния
 
   Future<void> _getInvoiceUnPaid() async {
     try {
       final response = await DioSingleton().dio.get(
           'employee/apartments/apartment_info/${widget.id}/payment-history/unpaid');
-      if (response.data != null) {
+      if (!_disposed && response.data != null) {
         setState(() {
           payments = DayList.fromJson(response.data as List<dynamic>);
           isLoading = false;
@@ -29,9 +30,11 @@ class _UnpaidPaymentScreenState extends State<UnpaidPaymentScreen> {
       }
     } catch (e) {
       print("Ошибка при получении данных: $e");
-      setState(() {
-        isLoading = false;
-      });
+      if (!_disposed) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -39,6 +42,12 @@ class _UnpaidPaymentScreenState extends State<UnpaidPaymentScreen> {
   void initState() {
     super.initState();
     _getInvoiceUnPaid();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true; // Устанавливаем флаг disposed
+    super.dispose();
   }
 
   @override

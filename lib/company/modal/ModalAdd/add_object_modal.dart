@@ -20,6 +20,7 @@ class _AddObjectModalState extends State<AddObjectModal> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   File? _image;
+  bool _isLoading = false; // Переменная состояния для управления загрузкой
 
   @override
   void dispose() {
@@ -29,6 +30,10 @@ class _AddObjectModalState extends State<AddObjectModal> {
   }
 
   Future<void> _createObject() async {
+    setState(() {
+      _isLoading = true; // Устанавливаем isLoading в true при начале запроса
+    });
+
     FormData formData = FormData.fromMap({
       "object_name": _nameController.text,
       "object_address": _addressController.text,
@@ -50,6 +55,11 @@ class _AddObjectModalState extends State<AddObjectModal> {
       );
     } catch (e) {
       // print('Ошибка при создании объекта: $e');
+    } finally {
+      setState(() {
+        _isLoading =
+            false; // Устанавливаем isLoading в false при завершении запроса
+      });
     }
   }
 
@@ -142,7 +152,7 @@ class _AddObjectModalState extends State<AddObjectModal> {
                         onTap: _pickImage,
                         child: Container(
                           width: double.infinity,
-                          constraints: BoxConstraints(minHeight: 55),
+                          constraints: BoxConstraints(minHeight: 130),
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 15),
                           decoration: BoxDecoration(
@@ -154,12 +164,15 @@ class _AddObjectModalState extends State<AddObjectModal> {
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.file_download_outlined),
+                              Icon(Icons.file_download_outlined,
+                                  color: Colors.grey, size: 30),
                               SizedBox(width: 10),
                               Text(
                                 'Download image',
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w500),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey),
                               )
                             ],
                           ),
@@ -170,11 +183,13 @@ class _AddObjectModalState extends State<AddObjectModal> {
                 ),
               ),
               CustomBtn(
-                  height: 55,
-                  title: 'Add an object',
-                  onPressed: () {
-                    _createObject();
-                  })
+                height: 55,
+                title: 'Add an object',
+                isLoading: _isLoading,
+                onPressed: () {
+                  _createObject();
+                },
+              ),
             ],
           ),
         ),

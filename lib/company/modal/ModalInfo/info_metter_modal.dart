@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/company/components/modal_header.dart';
+import 'package:flutter_application/company/modal/ModalInfo/payment/info_paid_modal.dart';
 import 'package:flutter_application/company/modal/service/service_state_item.dart';
 import 'package:flutter_application/service/dio_config.dart';
 import 'package:flutter_application/widget/empty_state.dart';
@@ -79,6 +80,20 @@ class _InfoMetterModalState extends State<InfoMetterModal> {
                               id: service['id'].toString(),
                               time: service['created_at_time'],
                               times: service['created_at_date'],
+                              onTap: () {
+                                Navigator.pop(context);
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(0),
+                                  ),
+                                  builder: (BuildContext context) {
+                                    return InfoPaidModal(
+                                        appartamentId: widget.id, id: 1);
+                                  },
+                                );
+                              },
                             );
                           },
                         ),

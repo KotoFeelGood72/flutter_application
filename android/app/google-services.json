@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:188375719694:android:0a9b81ed47c44ea182815f",
         "android_client_info": {
-          "package_name": "com.smartappart"
+          "package_name": "com.example.flutter_application"
         }
       },
       "oauth_client": [],

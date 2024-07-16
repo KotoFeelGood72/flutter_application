@@ -208,7 +208,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: <Widget>[
                                     Stack(
                                       children: [
-                                        Text(hasUnreadNotifications.toString()),
                                         IconButton(
                                           icon: const Icon(
                                             Icons.notifications,

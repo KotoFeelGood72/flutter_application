@@ -44,7 +44,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.smartappart"
+        applicationId "com.example.flutter_application"
         minSdkVersion 21  // Минимальная версия SDK
         targetSdkVersion 34  // Целевая версия SDK
         versionCode flutterVersionCode.toInteger()

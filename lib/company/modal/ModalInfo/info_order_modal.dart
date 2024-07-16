@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/company/bloc/company_bloc.dart';
 import 'package:flutter_application/company/components/item_status.dart';
 import 'package:flutter_application/company/components/uk_dropdown.dart';
+import 'package:flutter_application/company/modal/ModalAdd/add_executors.dart';
 import 'package:flutter_application/company/modal/message/success_modal.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/uk_text_field.dart';
@@ -108,6 +109,7 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
           orderData = response.data;
           isLoading = false;
           if (orderData['executor'].isNotEmpty) {
+            print(orderData);
             selectedItem = orderData['executor'].firstWhere(
               (executor) => executor['active'] == true,
               orElse: () => orderData['executor'].first,
@@ -333,24 +335,59 @@ class _InfoOrderModalState extends State<InfoOrderModal> {
                 fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),
-          UkDropdown(
-            isEnabled: isCompleted ? false : true,
-            itemsList:
-                List<Map<String, dynamic>>.from(orderData['executor'] ?? []),
-            selectedItemKey: dropdownValue,
-            onSelected: (selectedId) {
-              var executor = orderData['executor'].firstWhere(
-                (staff) => staff['id'].toString() == selectedId,
-                orElse: () => {},
-              );
-              setState(() {
-                selectedItem = executor;
-                dropdownValue = selectedId;
-              });
-            },
-            displayValueKey: 'first_name',
-            valueKey: 'id',
-          ),
+          if (!orderData['executor'].isNotEmpty)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF6873D1),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                margin: EdgeInsets.only(bottom: 20),
+                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
+                      builder: (BuildContext context) {
+                        return const AddExecutors();
+                      },
+                    );
+                  },
+                  child: Text(
+                    'Create executor',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          if (orderData['executor'].isNotEmpty)
+            UkDropdown(
+              isEnabled: isCompleted ? false : true,
+              itemsList:
+                  List<Map<String, dynamic>>.from(orderData['executor'] ?? []),
+              selectedItemKey: dropdownValue,
+              onSelected: (selectedId) {
+                var executor = orderData['executor'].firstWhere(
+                  (staff) => staff['id'].toString() == selectedId,
+                  orElse: () => {},
+                );
+                setState(() {
+                  selectedItem = executor;
+                  dropdownValue = selectedId;
+                });
+              },
+              displayValueKey: 'first_name',
+              valueKey: 'id',
+            ),
           const SizedBox(height: 5),
           if (orderData['status'] == 'new')
             CustomBtn(

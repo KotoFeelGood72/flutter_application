@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/company/components/modal_header.dart';
 import 'package:flutter_application/components/ui/custom_btn.dart';
 import 'package:flutter_application/components/ui/uk_text_field.dart';
 import 'package:flutter_application/models/ApartmentId.dart';
@@ -27,6 +28,7 @@ class _EditApartmentModalState extends State<EditApartmentModal> {
   late TextEditingController _areaController;
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -71,6 +73,10 @@ class _EditApartmentModalState extends State<EditApartmentModal> {
   }
 
   Future<void> _editApartment(ApartmentId updatedApartment) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final formData = FormData.fromMap({
         'apartment_name': updatedApartment.apartmentName,
@@ -101,6 +107,10 @@ class _EditApartmentModalState extends State<EditApartmentModal> {
     } catch (e) {
       debugPrint('Exception: $e');
       // Handle error
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -120,54 +130,76 @@ class _EditApartmentModalState extends State<EditApartmentModal> {
   Widget build(BuildContext context) {
     return Padding(
       padding: MediaQuery.of(context).viewInsets,
-      child: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      child: SingleChildScrollView(
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+          child: Wrap(
             children: [
-              UkTextField(
-                hint: 'Name apartments',
-                controller: _nameController,
-              ),
-              const SizedBox(height: 10),
-              UkTextField(
-                hint: 'Area apartments',
-                controller: _areaController,
-              ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: _pickImage,
-                child: DottedBorder(
-                  color: Colors.grey,
-                  strokeWidth: 1,
-                  dashPattern: [8, 4],
-                  borderType: BorderType.RRect,
-                  radius: Radius.circular(10),
-                  child: Container(
-                    width: double.infinity,
-                    height: 150,
-                    color: Colors.grey.shade200,
-                    child: _imageFile == null
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.cloud_upload,
-                                  size: 50, color: Colors.grey),
-                              Text('Upload files',
-                                  style: TextStyle(color: Colors.grey)),
-                            ],
-                          )
-                        : Image.file(_imageFile!, fit: BoxFit.cover),
+              ModalHeader(title: 'Edit appartaments'),
+              Container(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      UkTextField(
+                        hint: 'Name apartments',
+                        controller: _nameController,
+                      ),
+                      const SizedBox(height: 10),
+                      UkTextField(
+                        hint: 'Area apartments',
+                        controller: _areaController,
+                      ),
+                      const SizedBox(height: 16),
+                      if (_imageFile == null)
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: DottedBorder(
+                            color: Colors.grey,
+                            strokeWidth: 1,
+                            dashPattern: [8, 4],
+                            borderType: BorderType.RRect,
+                            radius: Radius.circular(10),
+                            child: Container(
+                              width: double.infinity,
+                              height: 150,
+                              color: Colors.grey.shade200,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.cloud_upload,
+                                      size: 50, color: Colors.grey),
+                                  Text('Upload files',
+                                      style: TextStyle(color: Colors.grey)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: double.infinity,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Image.file(_imageFile!, fit: BoxFit.cover),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      CustomBtn(
+                        onPressed: _save,
+                        title: 'Edit apartments',
+                        isLoading: _isLoading,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              CustomBtn(
-                onPressed: _save,
-                title: 'Edit apartments',
               ),
             ],
           ),

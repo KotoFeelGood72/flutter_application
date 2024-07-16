@@ -10,7 +10,8 @@ class ActionButtons extends StatelessWidget {
 
   Future<void> _signOut(BuildContext context) async {
     try {
-      await FirebaseAuth.instance.signOut();
+      // await FirebaseAuth.instance.signOut();
+      await DioSingleton().dio.post('logout');
       context.router.push(const AuthRoute());
     } catch (e) {
       print("Error on exit: $e");
