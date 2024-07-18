@@ -238,6 +238,7 @@ class CustomBigBtn extends StatelessWidget {
   final Color titleColor;
   final VoidCallback? onTap;
   final bool isActive;
+  final bool isLoading;
   final double? width;
 
   const CustomBigBtn({
@@ -248,6 +249,7 @@ class CustomBigBtn extends StatelessWidget {
     required this.titleColor,
     this.onTap,
     this.isActive = false,
+    this.isLoading = false,
     this.width,
   });
 
@@ -256,7 +258,7 @@ class CustomBigBtn extends StatelessWidget {
     return InkWell(
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -266,10 +268,25 @@ class CustomBigBtn extends StatelessWidget {
           color: backgroundColor,
         ),
         padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 57),
-        child: Text(
-          title,
-          style: TextStyle(
-              fontSize: 16, color: titleColor, fontWeight: FontWeight.w500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isLoading)
+              Container(
+                margin: const EdgeInsets.only(right: 10),
+                width: 16,
+                height: 16,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                ),
+              ),
+            Text(
+              title,
+              style: TextStyle(
+                  fontSize: 16, color: titleColor, fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
       ),
     );

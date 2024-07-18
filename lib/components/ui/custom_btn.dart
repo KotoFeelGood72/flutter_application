@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomBtn extends StatelessWidget {
   final String? title;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color color;
   final double height;
   final double borderRadius;
@@ -12,7 +12,7 @@ class CustomBtn extends StatelessWidget {
   const CustomBtn({
     super.key,
     this.title,
-    required this.onPressed,
+    this.onPressed,
     this.color = const Color(0xFF6873D1),
     this.height = 60.0,
     this.borderRadius = 15.0,

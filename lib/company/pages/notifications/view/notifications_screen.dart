@@ -110,14 +110,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         case 'client':
           if (type == 'order') {
             // Navigator.pop(context);
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (BuildContext context) {
-                return ClientOrderModal(
-                    id: int.parse(id), appartmentId: int.parse(apartmentId));
-              },
-            );
+            print('Appartament $apartmentId');
+            // showModalBottomSheet(
+            //   context: context,
+            //   isScrollControlled: true,
+            //   builder: (BuildContext context) {
+            //     return ClientOrderModal(
+            //         id: int.parse(id), appartmentId: int.parse(apartmentId));
+            //   },
+            // );
           } else if (type == 'news') {
             // Navigator.pop(context);
             AutoRouter.of(context)
