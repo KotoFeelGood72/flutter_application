@@ -86,6 +86,26 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
     }
   }
 
+  Future<void> _handleAppreciate() async {
+    try {
+      await DioSingleton()
+          .dio
+          .post('client/get_orders/${widget.id}/appreciate');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending appreciate request: $e');
+    }
+  }
+
+  Future<void> _handleDeprecate() async {
+    try {
+      await DioSingleton().dio.post('client/get_orders/${widget.id}/deprecate');
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error sending deprecate request: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -265,7 +285,7 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
                     child: CustomBtn(
                       title: 'Deprecate',
                       color: Colors.red,
-                      onPressed: () {},
+                      onPressed: _handleDeprecate,
                     ),
                   ),
                   const SizedBox(
@@ -275,7 +295,7 @@ class _ClientOrderModalState extends State<ClientOrderModal> {
                     child: CustomBtn(
                       title: 'Appreciate',
                       color: Colors.green,
-                      onPressed: () {},
+                      onPressed: _handleAppreciate,
                     ),
                   ),
                 ],

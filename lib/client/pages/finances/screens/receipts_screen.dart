@@ -34,19 +34,23 @@ class _ReceiptsScreenState extends State<ReceiptsScreen> {
   Future<void> _getInvoices() async {
     try {
       final response = await DioSingleton().dio.get('client/pay');
-      setState(() {
-        if (response.data != null) {
-          invoices = (response.data['invoice_history'] as List)
-              .map((e) => ClientInvoices.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (response.data != null) {
+            invoices = (response.data['invoice_history'] as List)
+                .map((e) => ClientInvoices.fromJson(e as Map<String, dynamic>))
+                .toList();
+          }
+          isLoading = false;
+        });
+      }
     } catch (e) {
       print('Ошибка при получении информации о счетах: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
